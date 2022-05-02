@@ -8,7 +8,7 @@
 //   /  |  \
 // C7  C4  C8  
 // ------------------------------------- 一些定义 ------
-#define alpha 0.3
-#define omega 0.5
+#define alpha 0.4
+#define omega 0.1
 
 #endif

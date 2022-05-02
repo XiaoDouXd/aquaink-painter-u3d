@@ -1,11 +1,8 @@
-﻿Shader "Hidden/d2q9_visualization"
+﻿Shader "Hidden/visualization"
 {
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
-        _LastTex0 ("TextureLast0", 2D) = "white" {}
-        _LastTex1234 ("TextureLast1234", 2D) = "white" {}
-        _LastTex5678 ("TextureLast5678", 2D) = "white" {}
     }
     SubShader
     {
@@ -18,7 +15,7 @@
             #pragma fragment frag
 
             #include "UnityCG.cginc"
-            #include "d2q9modelU3d.cginc"
+            #include "D2Q9model/d2q9modelU3d.cginc"
 
             struct v2f
             {
@@ -34,18 +31,17 @@
                 return o;
             }
 
-            sampler2D _MainTex;
-            // 上一帧的分量数据
             sampler2D _LastTex0;
             sampler2D _LastTex1234;
             sampler2D _LastTex5678;
+            sampler2D _MainTex;
 
             float4 frag (v2f i) : SV_Target
             {
-                const AP_D2Q9_Fi fi = tex2D(_LastTex0, _LastTex1234, _LastTex5678, i.uv);
-                float2 tmp = ap_d2q9_getVelocity(fi);
-
-                return float4(tmp, 0, 1);
+                AP_D2Q9_Fi fi = tex2D(_LastTex0, _LastTex1234, _LastTex5678, i.uv);
+                float2 v = ap_d2q9_getVelocity(fi);
+                
+                return float4(abs(v) * 9, 0, 100000);
             }
             ENDHLSL
         }

@@ -133,8 +133,6 @@ GameObject:
   m_Component:
   - component: {fileID: 963194228}
   - component: {fileID: 963194227}
-  - component: {fileID: 963194229}
-  - component: {fileID: 963194230}
   - component: {fileID: 963194226}
   - component: {fileID: 963194231}
   m_Layer: 0
@@ -213,27 +211,11 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &963194229
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 963194225}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c4287235a153f0a48874882a72c87c54, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  d2Q4Mat: {fileID: 2100000, guid: ca16d972d45ae754cba43cbb7699b758, type: 2}
-  visualization: {fileID: 2100000, guid: 8ff2fd435a2077b4893783df45b14103, type: 2}
-  initVelocity: {fileID: 2800000, guid: e5ed3aae3d9fb5e428e1fbc142f234a2, type: 3}
---- !u!114 &963194230
+--- !u!114 &963194231
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -242,29 +224,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 963194225}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4627ff8e81f7dad4b8e05d6661a8b09d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  d2Q9MatF0: {fileID: 2100000, guid: 3a7852990a748294f889c95f5c0653dd, type: 2}
-  d2Q9MatF1234: {fileID: 2100000, guid: 2cfb216f78cfc82488e87345a80ac3c1, type: 2}
-  d2Q9MatF5678: {fileID: 2100000, guid: 09f59a6cba7b00f4f8b1495355cf9dac, type: 2}
-  visualization: {fileID: 2100000, guid: f4459518463a91343a134f8c109f4c81, type: 2}
-  initVelocity: {fileID: 2800000, guid: cd3356d178e434347b8d0915cf0d662d, type: 3}
---- !u!114 &963194231
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 963194225}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 50771b5e2466c494387a3b39c4b86223, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   initTex: {fileID: 2800000, guid: 4e5acdea66e321f42a28e745586508ff, type: 3}
-  radius: 0.05
+  radius: 0.1
+  paper: {fileID: 2800000, guid: 47fe9acf14a92d24da3b44f96ceead0a, type: 3}
   writeTex: {fileID: 2800000, guid: 1329490957b4e18429bca624e95a57f5, type: 3}
+  visualization: {fileID: 2100000, guid: bdb60427f16972549a156952d793ab57, type: 2}
 --- !u!850595691 &981974726
 LightingSettings:
   m_ObjectHideFlags: 0
@@ -272,7 +239,7 @@ LightingSettings:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Settings.lighting
-  serializedVersion: 4
+  serializedVersion: 3
   m_GIWorkflowMode: 1
   m_EnableBakedLightmaps: 1
   m_EnableRealtimeLightmaps: 0
@@ -285,7 +252,7 @@ LightingSettings:
   m_LightmapMaxSize: 1024
   m_BakeResolution: 40
   m_Padding: 2
-  m_LightmapCompression: 3
+  m_TextureCompression: 1
   m_AO: 0
   m_AOMaxDistance: 1
   m_CompAOExponent: 1
@@ -326,4 +293,3 @@ LightingSettings:
   m_PVRFilteringAtrousPositionSigmaDirect: 0.5
   m_PVRFilteringAtrousPositionSigmaIndirect: 2
   m_PVRFilteringAtrousPositionSigmaAO: 1
-  m_PVRTiledBaking: 0

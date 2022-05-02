@@ -1,4 +1,4 @@
-﻿Shader "LBM_SRT/D2Q9Update_F1234"
+﻿Shader "LBM_SRT/D2Q9BoundBack_F5678"
 {
     SubShader
     {
@@ -12,7 +12,6 @@
 
             #include "UnityCG.cginc"
             #include "d2q9modelU3d.cginc"
-            #include "d2q9modelCoefs.hlsl"
 
             struct v2f
             {
@@ -30,19 +29,21 @@
             
             // 上一帧的分量数据
             float2 _Delta;
-            sampler2D _LastTex0;
             sampler2D _LastTex1234;
             sampler2D _LastTex5678;
+            sampler2D _Paper;
+            sampler2D _Glue;
 
             float4 frag (v2f i) : SV_Target
             {
-                // PIX_RULD
-                const AP_D2Q9_Fi f1 = tex2D(_LastTex0, _LastTex1234, _LastTex5678, i.uv + float2(_Delta.x, 0));
-                const AP_D2Q9_Fi f2 = tex2D(_LastTex0, _LastTex1234, _LastTex5678, i.uv + float2(0, _Delta.y));
-                const AP_D2Q9_Fi f3 = tex2D(_LastTex0, _LastTex1234, _LastTex5678, i.uv + float2(-_Delta.x, 0));
-                const AP_D2Q9_Fi f4 = tex2D(_LastTex0, _LastTex1234, _LastTex5678, i.uv + float2(0, -_Delta.y));
+                // PIX_5678
+                const AP_D2Q9_Fik f0 = tex2D(_LastTex1234, _LastTex5678, _Paper, _Glue, i.uv);
+                const AP_D2Q9_Fik f5 = tex2D(_LastTex1234, _LastTex5678, _Paper, _Glue, i.uv + float2(_Delta.x, _Delta.y));
+                const AP_D2Q9_Fik f6 = tex2D(_LastTex1234, _LastTex5678, _Paper, _Glue, i.uv + float2(-_Delta.x, _Delta.y));
+                const AP_D2Q9_Fik f7 = tex2D(_LastTex1234, _LastTex5678, _Paper, _Glue, i.uv + float2(-_Delta.x, -_Delta.y));
+                const AP_D2Q9_Fik f8 = tex2D(_LastTex1234, _LastTex5678, _Paper, _Glue, i.uv + float2(_Delta.x, -_Delta.y));
                 
-                return ap_d2q9_updateDataF1234(f1, f2, f3, f4, alpha, omega);
+                return ap_d2q9bb_updateDataF5678(f0, f5, f6, f7, f8);
             }
             ENDHLSL
         }

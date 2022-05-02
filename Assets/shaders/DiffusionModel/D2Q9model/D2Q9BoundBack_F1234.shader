@@ -1,12 +1,5 @@
-﻿Shader "Hidden/d2q9_visualization"
+﻿Shader "LBM_SRT/D2Q9BoundBack_F1234"
 {
-    Properties
-    {
-        _MainTex ("Texture", 2D) = "white" {}
-        _LastTex0 ("TextureLast0", 2D) = "white" {}
-        _LastTex1234 ("TextureLast1234", 2D) = "white" {}
-        _LastTex5678 ("TextureLast5678", 2D) = "white" {}
-    }
     SubShader
     {
         Cull Off ZWrite Off ZTest Always
@@ -25,7 +18,7 @@
                 float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
             };
- 
+
             v2f vert (appdata_base v)
             {
                 v2f o;
@@ -33,19 +26,23 @@
                 o.uv = v.texcoord;
                 return o;
             }
-
-            sampler2D _MainTex;
+            
             // 上一帧的分量数据
-            sampler2D _LastTex0;
+            float2 _Delta;
             sampler2D _LastTex1234;
             sampler2D _LastTex5678;
+            sampler2D _Paper;
+            sampler2D _Glue;
 
             float4 frag (v2f i) : SV_Target
             {
-                const AP_D2Q9_Fi fi = tex2D(_LastTex0, _LastTex1234, _LastTex5678, i.uv);
-                float2 tmp = ap_d2q9_getVelocity(fi);
-
-                return float4(tmp, 0, 1);
+                const AP_D2Q9_Fik f0 = tex2D(_LastTex1234, _LastTex5678, _Paper, _Glue, i.uv);
+                const AP_D2Q9_Fik f1 = tex2D(_LastTex1234, _LastTex5678, _Paper, _Glue, i.uv + float2(_Delta.x, 0));
+                const AP_D2Q9_Fik f2 = tex2D(_LastTex1234, _LastTex5678, _Paper, _Glue, i.uv + float2(0, _Delta.y));
+                const AP_D2Q9_Fik f3 = tex2D(_LastTex1234, _LastTex5678, _Paper, _Glue, i.uv + float2(-_Delta.x, 0));
+                const AP_D2Q9_Fik f4 = tex2D(_LastTex1234, _LastTex5678, _Paper, _Glue, i.uv + float2(0, -_Delta.y));
+                
+                return ap_d2q9bb_updateDataF1234(f0, f1, f2, f3, f4);
             }
             ENDHLSL
         }

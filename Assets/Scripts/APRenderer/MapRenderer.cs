@@ -1,8 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using APLayerFramework;
-using MapEnumerable = APLayerFramework.MapBase.MapEnumerable;
+using APMaps;
+using MapEnumerable = APMaps.MapBase.MapEnumerable;
 
 namespace APRenderer
 {

@@ -12,7 +12,7 @@
 #define c_sqrtD3 9                          // 3/(c^2)
 #define c_2sqrtSqrtD9 40.5                  // 9/(2*(c^4))
 #define c_2squrD3 4.5                       // 3/(2*(c^2))
-#define rho0 1                              // 神秘参数
+#define RHO0 1                              // 神秘参数
 #define weight1234 0.25                     // 各向权值
 float __AP_D2Q4_PRIVATE_FEQ(const float weight, const float rho, const float alpha, const float2 v, const float2 e_dir);
 float __AP_D2Q4_PRIVATE_F(const float omega, const float pre, const float feq);
@@ -69,7 +69,7 @@ float __AP_D2Q4_PRIVATE_FEQ(const float weight, const float rho, const float alp
     float ev = dot(e_dir, v);
     float vv = dot(v, v);
 
-    return weight * (rho + rho0*Psi*(c_sqrtD3*ev + c_2sqrtSqrtD9*ev*ev - c_2squrD3*vv));
+    return weight * (rho + RHO0*Psi*(c_sqrtD3*ev + c_2sqrtSqrtD9*ev*ev - c_2squrD3*vv));
 }
 
 // LBGK更新方程

@@ -74,3 +74,4 @@ crashlytics-build.properties
 .vsconfig
 .idea
 .vscode
+/[Bb]uild

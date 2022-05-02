@@ -38,16 +38,18 @@
             // 方形
             float4 _rect;
 
+            #define DIST 0.1
+
             float4 frag (v2f i) : SV_Target
             {
-                const float2 mainUV = float2((i.uv.x - _rect.x) / (_rect.z - _rect.x), (i.uv.y - _rect.y) / (_rect.w - _rect.y));
-                
                 float4 col = tex2D(_DestTex, i.uv);
-                const float4 colNew = tex2D(_MainTex, mainUV) * 1000;
-
-                col = in01(mainUV) ? colNew * 100 : col;
+                // const float4 colNew = abs(tex2D(_MainTex, mainUV));
+                // 画圆
+                float dis = distance(i.uv, (_rect.xy + _rect.zw)/2.0);
+                dis = dis <= DIST ? 1 - dis / DIST : 0;
+                float4 colNew = dis * float4(1.0/9, 1.0/9, 1.0/9, 1.0/9) + (1 - dis) * col;
                 
-                return col;
+                return colNew;
             }
             ENDHLSL
         }

@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using APLayerFramework;
+﻿using APMaps;
 using UnityEngine;
-using MapEnumerable = APLayerFramework.MapBase.MapEnumerable;
+using MapEnumerable = APMaps.MapBase.MapEnumerable;
 
 /// <summary>
 /// 画布管理器
@@ -15,7 +12,9 @@ public class APCanvasMgr : MonoBehaviour
     [Range(0, 1)]
     public float radius = 0.05f;
 
+    public Texture2D paper;
     public Texture2D writeTex;
+    public Material visualization;
     
     private static APCanvasMgr _i;
     private MapFlowD2Q9 _flow;
@@ -35,11 +34,14 @@ public class APCanvasMgr : MonoBehaviour
 
     private void Start()
     {
-        _flow = new MapFlowD2Q9(Screen.width, Screen.height);
+        _flow = new MapFlowD2Q9(Screen.width, Screen.height, paper, null);
         _flowList = new MapEnumerable(MapRankTypes.WATER_FLOW);
         
         // 初始化
         _flow.DoWrite(null, Vector4.zero, initTex, initTex, initTex);
+        visualization.SetTexture("_LastTex0", _flow.F0);
+        visualization.SetTexture("_LastTex1234", _flow.F1234);
+        visualization.SetTexture("_LastTex5678", _flow.F5678);
     }
 
     private void Update()
@@ -56,12 +58,10 @@ public class APCanvasMgr : MonoBehaviour
 
     private void OnRenderImage(RenderTexture src, RenderTexture dest)
     {
-        
-        
         foreach (var flow in _flowList)
         {
             flow.DoUpdate();
         }
-        Graphics.Blit(_flow.Tex, dest);
+        Graphics.Blit(_flow.Tex, dest, visualization);
     }
 }
