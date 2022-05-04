@@ -38,10 +38,13 @@
 
             float4 frag (v2f i) : SV_Target
             {
-                AP_D2Q9_Fi fi = tex2D(_LastTex0, _LastTex1234, _LastTex5678, i.uv);
-                float2 v = ap_d2q9_getVelocity(fi);
+                // AP_D2Q9_Fi fi = ap_tex2D(_LastTex0, _LastTex1234, _LastTex5678, i.uv);
+                // float2 v = ap_d2q9_getVelocity(fi);
+                // float r = __AP_D2Q9_PRIVATE_RHO(fi);
+                float4 col = tex2D(_MainTex, i.uv);
+                col = lerp(float4(1, 1, 1, 1), col, col.w);
                 
-                return float4(abs(v) * 9, 0, 100000);
+                return col;
             }
             ENDHLSL
         }

@@ -49,6 +49,13 @@ namespace APMaps
         /// <param name="texs"> 要写入的贴图 </param>
         public virtual void DoWrite(Vector4 rect, params Texture[] texs) {}
         /// <summary>
+        /// 写入贴图
+        /// </summary>
+        /// <param name="rect"> 写入的位置(所有项取值为0~1) 指左上角和右下角的位置 </param>
+        /// <param name="color"> 写入的颜色 </param>
+        /// <param name="texs"> 要写入的贴图 </param>
+        public virtual void DoWrite(Vector4 rect, Color color, params Texture[] texs) {}
+        /// <summary>
         /// 重置贴图
         /// </summary>
         public virtual void DoRecreate(int width, int height, bool clear = true)

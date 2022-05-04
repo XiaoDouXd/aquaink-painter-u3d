@@ -1,4 +1,4 @@
-﻿Shader "AP/DoWrite_Add"
+﻿Shader "AP/DoWrite_Col"
 {
     Properties
     {
@@ -37,16 +37,18 @@
             sampler2D _DestTex;
             // 方形
             float4 _rect;
+            // 颜色
+            float4 _Color;
 
             float4 frag (v2f i) : SV_Target
             {
                 float4 col = tex2D(_DestTex, i.uv);
+                const unorm float size = abs(_rect.x - _rect.z) / 2.0;
                 // const float4 colNew = abs(tex2D(_MainTex, mainUV));
                 // 画圆
-                const unorm float DIST = abs(_rect.x - _rect.z) / 2.0;
                 float dis = distance(i.uv, (_rect.xy + _rect.zw)/2.0);
-                dis = dis <= DIST ? 1 - dis / DIST : 0;
-                float4 colNew = dis * float4(1.0/9, 1.0/9, 1.0/9, 1.0/9) + (1 - dis) * col;
+                dis = dis <= size ? 1 - dis / size : 0;
+                float4 colNew = dis * _Color + (1 - dis) * col;
                 
                 return colNew;
             }

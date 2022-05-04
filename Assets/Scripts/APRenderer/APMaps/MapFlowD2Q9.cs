@@ -27,8 +27,6 @@ namespace APMaps
         private readonly Material _d2Q9MatF0;
         private readonly Material _d2Q9MatF1234;
         private readonly Material _d2Q9MatF5678;
-        private readonly Material _d2Q9BBF1234;
-        private readonly Material _d2Q9BBF5678;
         private readonly Material _d2Q9DoWrite;
         
         private static readonly int LastTex0 = Shader.PropertyToID("_LastTex0");
@@ -45,8 +43,6 @@ namespace APMaps
             var f0 = Shader.Find("LBM_SRT/D2Q9Update_F0");
             var f1234 = Shader.Find("LBM_SRT/D2Q9Update_F1234");
             var f5678 = Shader.Find("LBM_SRT/D2Q9Update_F5678");
-            var bbf1234 = Shader.Find("LBM_SRT/D2Q9BoundBack_F1234");
-            var bbf5678 = Shader.Find("LBM_SRT/D2Q9BoundBack_F5678");
             var doWrite = Shader.Find("AP/DoWrite_Add");
 
             // 初始化材质
@@ -54,14 +50,12 @@ namespace APMaps
             _d2Q9MatF1234 = new Material(f1234) { hideFlags = HideFlags.DontSave };
             _d2Q9MatF5678 = new Material(f5678) { hideFlags = HideFlags.DontSave };
             _d2Q9DoWrite = new Material(doWrite) { hideFlags = HideFlags.DontSave };
-            _d2Q9BBF1234 = new Material(bbf1234) { hideFlags = HideFlags.DontSave };
-            _d2Q9BBF5678 = new Material(bbf5678) { hideFlags = HideFlags.DontSave };
 
             // 初始化贴图
-            _rtF0 = new RenderTexture(width, height, 0, GraphicsFormat.R32_SFloat) { filterMode = FilterMode.Point };
-            _rtF1234 = new RenderTexture(width, height, 0, GraphicsFormat.R32G32B32A32_SFloat) { filterMode = FilterMode.Point };
-            _rtF5678 = new RenderTexture(width, height, 0, GraphicsFormat.R32G32B32A32_SFloat) { filterMode = FilterMode.Point };
-            _rtTemp = new RenderTexture(width, height, 0, GraphicsFormat.R32G32B32A32_SFloat) { filterMode = FilterMode.Point };
+            _rtF0 = new RenderTexture(width, height, 0, GraphicsFormat.R8_UNorm) { filterMode = FilterMode.Point };
+            _rtF1234 = new RenderTexture(width, height, 0, GraphicsFormat.R8G8B8A8_UNorm) { filterMode = FilterMode.Point };
+            _rtF5678 = new RenderTexture(width, height, 0, GraphicsFormat.R8G8B8A8_UNorm) { filterMode = FilterMode.Point };
+            _rtTemp = new RenderTexture(width, height, 0, GraphicsFormat.R8G8B8A8_UNorm) { filterMode = FilterMode.Point };
             _rtTemp.Create();
             _rtF0.Create();
             _rtF1234.Create();
@@ -81,12 +75,6 @@ namespace APMaps
             _d2Q9MatF5678.SetTexture(LastTex0, _rtF0);
             _d2Q9MatF5678.SetTexture(LastTex1234, _rtF1234);
             _d2Q9MatF5678.SetTexture(LastTex5678, _rtF5678);
-            _d2Q9BBF1234.SetVector(Delta, delta);
-            _d2Q9BBF1234.SetTexture(LastTex1234, _rtF1234);
-            _d2Q9BBF1234.SetTexture(LastTex5678, _rtF5678);
-            _d2Q9BBF5678.SetVector(Delta, delta);
-            _d2Q9BBF5678.SetTexture(LastTex1234, _rtF1234);
-            _d2Q9BBF5678.SetTexture(LastTex5678, _rtF5678);
         }
         
         public MapFlowD2Q9(int width, int height, Texture paper, Texture glue) : base((uint)width, (uint)height, MapRankTypes.WATER_FLOW)
@@ -97,8 +85,6 @@ namespace APMaps
             var f0 = Shader.Find("LBM_SRT/D2Q9Update_F0");
             var f1234 = Shader.Find("LBM_SRT/D2Q9Update_F1234");
             var f5678 = Shader.Find("LBM_SRT/D2Q9Update_F5678");
-            var bbf1234 = Shader.Find("LBM_SRT/D2Q9BoundBack_F1234");
-            var bbf5678 = Shader.Find("LBM_SRT/D2Q9BoundBack_F5678");
             var doWrite = Shader.Find("AP/DoWrite_Add");
 
             // 初始化材质
@@ -106,8 +92,6 @@ namespace APMaps
             _d2Q9MatF1234 = new Material(f1234) { hideFlags = HideFlags.DontSave };
             _d2Q9MatF5678 = new Material(f5678) { hideFlags = HideFlags.DontSave };
             _d2Q9DoWrite = new Material(doWrite) { hideFlags = HideFlags.DontSave };
-            _d2Q9BBF1234 = new Material(bbf1234) { hideFlags = HideFlags.DontSave };
-            _d2Q9BBF5678 = new Material(bbf5678) { hideFlags = HideFlags.DontSave };
 
             // 初始化贴图
             _rtF0 = new RenderTexture(width, height, 0, GraphicsFormat.R32_SFloat) { filterMode = FilterMode.Point };
@@ -122,28 +106,23 @@ namespace APMaps
             // 设置贴图到材质
             var delta = new Vector2(1.0f / Width, 1.0f / Height);
             _d2Q9MatF0.SetVector(Delta, delta);
+            _d2Q9MatF0.SetTexture(Paper, _paper);
+            _d2Q9MatF0.SetTexture(Glue, _glue);
             _d2Q9MatF0.SetTexture(LastTex0, _rtF0);
             _d2Q9MatF0.SetTexture(LastTex1234, _rtF1234);
             _d2Q9MatF0.SetTexture(LastTex5678, _rtF5678);
             _d2Q9MatF1234.SetVector(Delta, delta);
+            _d2Q9MatF1234.SetTexture(Paper, _paper);
+            _d2Q9MatF1234.SetTexture(Glue, _glue);
             _d2Q9MatF1234.SetTexture(LastTex0, _rtF0);
             _d2Q9MatF1234.SetTexture(LastTex1234, _rtF1234);
             _d2Q9MatF1234.SetTexture(LastTex5678, _rtF5678);
             _d2Q9MatF5678.SetVector(Delta, delta);
+            _d2Q9MatF5678.SetTexture(Paper, _paper);
+            _d2Q9MatF5678.SetTexture(Glue, _glue);
             _d2Q9MatF5678.SetTexture(LastTex0, _rtF0);
             _d2Q9MatF5678.SetTexture(LastTex1234, _rtF1234);
             _d2Q9MatF5678.SetTexture(LastTex5678, _rtF5678);
-            
-            _d2Q9BBF1234.SetVector(Delta, delta);
-            _d2Q9BBF1234.SetTexture(LastTex1234, _rtF1234);
-            _d2Q9BBF1234.SetTexture(LastTex5678, _rtF5678);
-            _d2Q9BBF1234.SetTexture(Paper, _paper);
-            _d2Q9BBF1234.SetTexture(Glue, _glue);
-            _d2Q9BBF5678.SetVector(Delta, delta);
-            _d2Q9BBF5678.SetTexture(LastTex1234, _rtF1234);
-            _d2Q9BBF5678.SetTexture(LastTex5678, _rtF5678);
-            _d2Q9BBF5678.SetTexture(Paper, _paper);
-            _d2Q9BBF5678.SetTexture(Glue, _glue);
         }
 
         public override void DoRecreate(int width, int height, bool clear = true)
@@ -166,10 +145,6 @@ namespace APMaps
             Graphics.Blit(null, _rtTemp, _d2Q9MatF1234);
             Graphics.Blit(_rtTemp, _rtF1234);
             Graphics.Blit(null, _rtTemp, _d2Q9MatF5678);
-            Graphics.Blit(_rtTemp, _rtF5678);
-            Graphics.Blit(null, _rtTemp, _d2Q9BBF1234);
-            Graphics.Blit(_rtTemp, _rtF1234);
-            Graphics.Blit(null, _rtTemp, _d2Q9BBF5678);
             Graphics.Blit(_rtTemp, _rtF5678);
         }
 

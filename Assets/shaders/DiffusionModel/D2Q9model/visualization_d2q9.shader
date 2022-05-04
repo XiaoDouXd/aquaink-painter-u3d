@@ -42,7 +42,7 @@
 
             float4 frag (v2f i) : SV_Target
             {
-                const AP_D2Q9_Fi fi = tex2D(_LastTex0, _LastTex1234, _LastTex5678, i.uv);
+                const AP_D2Q9_Fi fi = ap_tex2D(_LastTex0, _LastTex1234, _LastTex5678, i.uv);
                 float2 tmp = ap_d2q9_getVelocity(fi);
 
                 return float4(tmp, 0, 1);

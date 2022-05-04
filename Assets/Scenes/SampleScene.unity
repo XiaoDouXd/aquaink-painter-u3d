@@ -157,7 +157,7 @@ MonoBehaviour:
   mixboxBlurMat: {fileID: 2100000, guid: 4ef33dd50dbca38499b129d40b577d6b, type: 2}
   ctableTex: {fileID: 2800000, guid: 3a71859f5d5239f40872b696a597ea2a, type: 3}
   colorLeft: {r: 1, g: 1, b: 1, a: 0}
-  colorRight: {r: 0, g: 0, b: 0.5188679, a: 0}
+  colorRight: {r: 0, g: 0.5353775, b: 1, a: 0}
 --- !u!20 &963194227
 Camera:
   m_ObjectHideFlags: 0
@@ -229,9 +229,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   initTex: {fileID: 2800000, guid: 4e5acdea66e321f42a28e745586508ff, type: 3}
   radius: 0.1
-  paper: {fileID: 2800000, guid: 47fe9acf14a92d24da3b44f96ceead0a, type: 3}
+  color: {r: 0, g: 0.754717, b: 0.6775937, a: 1}
+  gule: {fileID: 2800000, guid: ed0d754ab708cef4394460049392607b, type: 3}
+  paper: {fileID: 2800000, guid: ed0d754ab708cef4394460049392607b, type: 3}
   writeTex: {fileID: 2800000, guid: 1329490957b4e18429bca624e95a57f5, type: 3}
   visualization: {fileID: 2100000, guid: bdb60427f16972549a156952d793ab57, type: 2}
+  colTable: {fileID: 2800000, guid: 3a71859f5d5239f40872b696a597ea2a, type: 3}
 --- !u!850595691 &981974726
 LightingSettings:
   m_ObjectHideFlags: 0

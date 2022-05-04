@@ -30,6 +30,8 @@
             
             // 上一帧的分量数据
             float2 _Delta;
+            sampler2D _Paper;
+            sampler2D _Glue;
             sampler2D _LastTex0;
             sampler2D _LastTex1234;
             sampler2D _LastTex5678;
@@ -37,7 +39,7 @@
             float4 frag (v2f i) : SV_Target
             {
                 // PIX_C
-                const AP_D2Q9_Fi f0 = tex2D(_LastTex0, _LastTex1234, _LastTex5678, i.uv);
+                const AP_D2Q9_Fi f0 = ap_tex2D_kp(_LastTex0, _LastTex1234, _LastTex5678, i.uv, _Delta, _Paper, _Glue);
                 float o = ap_d2q9_updateDataF0(f0, alpha, omega);
                 
                 return float4(o, 0, 0, 0);
