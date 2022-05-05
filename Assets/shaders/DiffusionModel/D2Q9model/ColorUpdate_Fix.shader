@@ -1,4 +1,4 @@
-﻿Shader "LBM_SRT/D2Q9Update_F0"
+﻿Shader "COL_UPD/ColUpdate_Fix"
 {
     SubShader
     {
@@ -12,7 +12,8 @@
 
             #include "UnityCG.cginc"
             #include "d2q9modelU3d.cginc"
-            #include "d2q9modelCoefs.hlsl"
+            
+            #include "../PigmentUpdateModel/colmix.hlsl"
 
             struct v2f
             {
@@ -29,21 +30,25 @@
             }
             
             // 上一帧的分量数据
-            float2 _Delta;
-            sampler2D _Paper;
-            sampler2D _Glue;
+            sampler2D _Adv;
+            sampler2D _Fix;
             sampler2D _LastTex0;
             sampler2D _LastTex1234;
             sampler2D _LastTex5678;
+
+            Texture2D _ColTable;
+            SamplerState sampler_ColTable;
             
-            float2 frag (v2f i) : SV_Target
+            float4 frag (v2f i) : SV_Target
             {
-                // PIX_C
-                const AP_D2Q9_Fi f0 = ap_tex2D_kp(_LastTex0, _LastTex1234, _LastTex5678, i.uv, _Delta, _Paper, _Glue);
-                const float r = ap_d2q9_getRho(f0);
-                const float o = ap_d2q9_updateDataF0(f0, alpha, omega);
+                const float factor = ap_getFixtureFactor(_LastTex0, _LastTex1234, _LastTex5678, i.uv);
+
+                float4 col_a = tex2D(_Adv, i.uv);
+                float4 col_f = tex2D(_Fix, i.uv);
+                col_f.w += col_a.w * factor;
+                col_f.xyz = ap_mixbox_kmerp(col_f.xyz, col_a.xyz, (1 - col_a.w * factor), _ColTable, sampler_ColTable);
                 
-                return float2(o, r);
+                return col_f;
             }
             ENDHLSL
         }

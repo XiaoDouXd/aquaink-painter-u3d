@@ -15,6 +15,7 @@
             #pragma fragment frag
 
             #include "UnityCG.cginc"
+            #include "PigmentUpdateModel/colmix.hlsl"
             #include "D2Q9model/d2q9modelU3d.cginc"
 
             struct v2f
@@ -30,21 +31,29 @@
                 o.uv = v.texcoord;
                 return o;
             }
-
+            
+            sampler2D _Adv;
+            sampler2D _Fix;
             sampler2D _LastTex0;
             sampler2D _LastTex1234;
             sampler2D _LastTex5678;
             sampler2D _MainTex;
+
+            Texture2D _ColTable;
+            SamplerState sampler_ColTable;
 
             float4 frag (v2f i) : SV_Target
             {
                 // AP_D2Q9_Fi fi = ap_tex2D(_LastTex0, _LastTex1234, _LastTex5678, i.uv);
                 // float2 v = ap_d2q9_getVelocity(fi);
                 // float r = __AP_D2Q9_PRIVATE_RHO(fi);
-                float4 col = tex2D(_MainTex, i.uv);
+                float4 col = tex2D(_Fix, i.uv);
+                float4 colAdv = tex2D(_Adv, i.uv);
+
+                //col = float4(ap_mixbox_kmerp(col.xyz, colAdv.xyz, 0, _ColTable, sampler_ColTable), col.w + colAdv.w);
                 col = lerp(float4(1, 1, 1, 1), col, col.w);
                 
-                return col;
+                return col;// float4(1, 0, 0, 1);
             }
             ENDHLSL
         }

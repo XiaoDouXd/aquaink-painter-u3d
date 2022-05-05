@@ -15,7 +15,7 @@
             #pragma fragment frag
 
             #include "UnityCG.cginc"
-            #include "doWrite_clamp.hlsl"
+            #include "PigmentUpdateModel/colmix.hlsl"
 
             struct v2f
             {
@@ -35,6 +35,8 @@
             sampler2D _MainTex;
             // _DestTex 为目标贴图
             sampler2D _DestTex;
+            Texture2D _ColTable;
+            SamplerState sampler_ColTable;
             // 方形
             float4 _rect;
             // 颜色
@@ -48,7 +50,7 @@
                 // 画圆
                 float dis = distance(i.uv, (_rect.xy + _rect.zw)/2.0);
                 dis = dis <= size ? 1 - dis / size : 0;
-                float4 colNew = dis * _Color + (1 - dis) * col;
+                float4 colNew = float4(ap_mixbox_kmerp(col, _Color, _Color.a * dis, _ColTable, sampler_ColTable), lerp(col.a, _Color.a, dis));
                 
                 return colNew;
             }

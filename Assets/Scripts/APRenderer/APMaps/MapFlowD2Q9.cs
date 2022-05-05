@@ -27,7 +27,9 @@ namespace APMaps
         private readonly Material _d2Q9MatF0;
         private readonly Material _d2Q9MatF1234;
         private readonly Material _d2Q9MatF5678;
-        private readonly Material _d2Q9DoWrite;
+        private readonly Material _d2Q9DoWriteF0;
+        private readonly Material _d2Q9DoWriteF1234;
+        private readonly Material _d2Q9DoWriteF5678;
         
         private static readonly int LastTex0 = Shader.PropertyToID("_LastTex0");
         private static readonly int LastTex1234 = Shader.PropertyToID("_LastTex1234");
@@ -43,16 +45,20 @@ namespace APMaps
             var f0 = Shader.Find("LBM_SRT/D2Q9Update_F0");
             var f1234 = Shader.Find("LBM_SRT/D2Q9Update_F1234");
             var f5678 = Shader.Find("LBM_SRT/D2Q9Update_F5678");
-            var doWrite = Shader.Find("AP/DoWrite_Add");
+            var doWriteF0 = Shader.Find("AP/DoWrite_WaterF0");
+            var doWriteF1234 = Shader.Find("AP/DoWrite_WaterF1234");
+            var doWriteF5678 = Shader.Find("AP/DoWrite_WaterF5678");
 
             // 初始化材质
             _d2Q9MatF0 = new Material(f0) { hideFlags = HideFlags.DontSave };
             _d2Q9MatF1234 = new Material(f1234) { hideFlags = HideFlags.DontSave };
             _d2Q9MatF5678 = new Material(f5678) { hideFlags = HideFlags.DontSave };
-            _d2Q9DoWrite = new Material(doWrite) { hideFlags = HideFlags.DontSave };
+            _d2Q9DoWriteF0 = new Material(doWriteF0) { hideFlags = HideFlags.DontSave };
+            _d2Q9DoWriteF1234 = new Material(doWriteF1234) { hideFlags = HideFlags.DontSave };
+            _d2Q9DoWriteF5678 = new Material(doWriteF5678) { hideFlags = HideFlags.DontSave };
 
             // 初始化贴图
-            _rtF0 = new RenderTexture(width, height, 0, GraphicsFormat.R8_UNorm) { filterMode = FilterMode.Point };
+            _rtF0 = new RenderTexture(width, height, 0, GraphicsFormat.R8G8_UNorm) { filterMode = FilterMode.Point };
             _rtF1234 = new RenderTexture(width, height, 0, GraphicsFormat.R8G8B8A8_UNorm) { filterMode = FilterMode.Point };
             _rtF5678 = new RenderTexture(width, height, 0, GraphicsFormat.R8G8B8A8_UNorm) { filterMode = FilterMode.Point };
             _rtTemp = new RenderTexture(width, height, 0, GraphicsFormat.R8G8B8A8_UNorm) { filterMode = FilterMode.Point };
@@ -85,13 +91,17 @@ namespace APMaps
             var f0 = Shader.Find("LBM_SRT/D2Q9Update_F0");
             var f1234 = Shader.Find("LBM_SRT/D2Q9Update_F1234");
             var f5678 = Shader.Find("LBM_SRT/D2Q9Update_F5678");
-            var doWrite = Shader.Find("AP/DoWrite_Add");
+            var doWriteF0 = Shader.Find("AP/DoWrite_WaterF0");
+            var doWriteF1234 = Shader.Find("AP/DoWrite_WaterF1234");
+            var doWriteF5678 = Shader.Find("AP/DoWrite_WaterF5678");
 
             // 初始化材质
             _d2Q9MatF0 = new Material(f0) { hideFlags = HideFlags.DontSave };
             _d2Q9MatF1234 = new Material(f1234) { hideFlags = HideFlags.DontSave };
             _d2Q9MatF5678 = new Material(f5678) { hideFlags = HideFlags.DontSave };
-            _d2Q9DoWrite = new Material(doWrite) { hideFlags = HideFlags.DontSave };
+            _d2Q9DoWriteF0 = new Material(doWriteF0) { hideFlags = HideFlags.DontSave };
+            _d2Q9DoWriteF1234 = new Material(doWriteF1234) { hideFlags = HideFlags.DontSave };
+            _d2Q9DoWriteF5678 = new Material(doWriteF5678) { hideFlags = HideFlags.DontSave };
 
             // 初始化贴图
             _rtF0 = new RenderTexture(width, height, 0, GraphicsFormat.R32_SFloat) { filterMode = FilterMode.Point };
@@ -123,6 +133,10 @@ namespace APMaps
             _d2Q9MatF5678.SetTexture(LastTex0, _rtF0);
             _d2Q9MatF5678.SetTexture(LastTex1234, _rtF1234);
             _d2Q9MatF5678.SetTexture(LastTex5678, _rtF5678);
+            
+            _d2Q9DoWriteF0.SetTexture(DestTex, _rtF0);
+            _d2Q9DoWriteF5678.SetTexture(DestTex, _rtF5678);
+            _d2Q9DoWriteF1234.SetTexture(DestTex, _rtF1234);
         }
 
         public override void DoRecreate(int width, int height, bool clear = true)
@@ -179,17 +193,17 @@ namespace APMaps
             if (texs.Length < 3)
                 throw new ApplicationException("MapFlowD2Q9.DoWrite: 传入贴图数量错误");
             
-            _d2Q9DoWrite.SetVector(Rect1, rect);
-            _d2Q9DoWrite.SetTexture(DestTex, _rtF0);
-            Graphics.Blit(texs[0], _rtTemp, _d2Q9DoWrite);
+            _d2Q9DoWriteF0.SetVector(Rect1, rect);
+            _d2Q9DoWriteF1234.SetVector(Rect1, rect);
+            _d2Q9DoWriteF5678.SetVector(Rect1, rect);
+            
+            Graphics.Blit(texs[0], _rtTemp, _d2Q9DoWriteF0);
             Graphics.Blit(_rtTemp, _rtF0);
             
-            _d2Q9DoWrite.SetTexture(DestTex, _rtF1234);
-            Graphics.Blit(texs[1], _rtTemp, _d2Q9DoWrite);
+            Graphics.Blit(texs[1], _rtTemp, _d2Q9DoWriteF1234);
             Graphics.Blit(_rtTemp, _rtF1234);
             
-            _d2Q9DoWrite.SetTexture(DestTex, _rtF5678);
-            Graphics.Blit(texs[2], _rtTemp, _d2Q9DoWrite);
+            Graphics.Blit(texs[2], _rtTemp, _d2Q9DoWriteF5678);
             Graphics.Blit(_rtTemp, _rtF5678);
         }
     }

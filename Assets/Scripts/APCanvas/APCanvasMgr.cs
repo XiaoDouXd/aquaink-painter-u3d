@@ -34,7 +34,7 @@ public class APCanvasMgr : MonoBehaviour
         if (_i == null)
         {
             _i = this;
-            Application.targetFrameRate = 24;
+            // Application.targetFrameRate = 30;
             DontDestroyOnLoad(gameObject);
         }
         else
@@ -52,6 +52,9 @@ public class APCanvasMgr : MonoBehaviour
         visualization.SetTexture("_LastTex0", _flow.F0);
         visualization.SetTexture("_LastTex1234", _flow.F1234);
         visualization.SetTexture("_LastTex5678", _flow.F5678);
+        visualization.SetTexture("_Adv", _col.Glue);
+        visualization.SetTexture("_Fix", _col.Tex);
+        visualization.SetTexture("_ColTable", colTable);
     }
 
     private void Update()
@@ -64,6 +67,15 @@ public class APCanvasMgr : MonoBehaviour
             Vector4 rect = new Vector4(posx - radius, posy - radius, posx + radius, posy + radius);
             _flow.DoWrite(rect, writeTex, writeTex, writeTex);
             _col.DoWrite(rect, color, writeTex);
+        }
+
+        if (Input.GetKey(KeyCode.UpArrow))
+        {
+            radius += radius >= 1.0 ? 0 : 0.005f;
+        }
+        else if (Input.GetKey(KeyCode.DownArrow))
+        {
+            radius -= radius <= 0.005 ? 0 : 0.005f;
         }
     }
 

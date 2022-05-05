@@ -1,4 +1,4 @@
-﻿Shader "AP/DoWrite_AlphaBlend"
+﻿Shader "AP/DoWrite_WaterF5678"
 {
     Properties
     {
@@ -15,7 +15,6 @@
             #pragma fragment frag
 
             #include "UnityCG.cginc"
-            #include "doWrite_clamp.cginc"
 
             struct v2f
             {
@@ -40,14 +39,15 @@
 
             float4 frag (v2f i) : SV_Target
             {
-                const float2 mainUV = float2((i.uv.x - _rect.x) / (_rect.z - _rect.x), (i.uv.y - _rect.y) / (_rect.w - _rect.y));
-                
                 float4 col = tex2D(_DestTex, i.uv);
-                const float4 colNew = tex2D(_MainTex, mainUV);
-
-                col = in01(mainUV) ? col : lerp(colNew, col, colNew.a);
+                // const float4 colNew = abs(tex2D(_MainTex, mainUV));
+                // 画圆
+                const unorm float DIST = abs(_rect.x - _rect.z) / 2.0;
+                float dis = distance(i.uv, (_rect.xy + _rect.zw)/2.0);
+                dis = dis <= DIST ? 1 - dis / DIST : 0;
+                float4 colNew = dis * float4(1.0/36, 1.0/36, 1.0/36, 1.0/36) + (1 - dis) * col;
                 
-                return col;
+                return colNew;
             }
             ENDHLSL
         }

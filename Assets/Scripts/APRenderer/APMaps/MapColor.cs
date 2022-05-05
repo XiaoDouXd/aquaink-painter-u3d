@@ -14,7 +14,7 @@ namespace APMaps
         /// <summary>
         /// 颜色贴图
         /// </summary>
-        public override Texture Tex => _colAdv;
+        public override Texture Tex => _colFix;
         public Texture Glue => _colAdv;
 
         /// <summary>
@@ -24,9 +24,9 @@ namespace APMaps
         private RenderTexture _colFix;
         private RenderTexture _rtTemp;
 
-        private Material _matColAdv;
-        private Material _matColFix;
-        private Material _matWrite;
+        private readonly Material _matColAdv;
+        private readonly Material _matColFix;
+        private readonly Material _matWrite;
 
         private MapFlowD2Q9 _d2q9Map;
         
@@ -39,6 +39,8 @@ namespace APMaps
         private static readonly int Rect1 = Shader.PropertyToID("_rect");
         private static readonly int ColTable = Shader.PropertyToID("_ColTable");
         private static readonly int Color1 = Shader.PropertyToID("_Color");
+        private static readonly int Adv = Shader.PropertyToID("_Adv");
+        private static readonly int Fix = Shader.PropertyToID("_Fix");
 
         public MapColor(int width, int height, MapFlowD2Q9 d2Q9) : base((uint)width, (uint)height, MapRankTypes.COLOR_FIX)
         {
@@ -46,14 +48,17 @@ namespace APMaps
             
             var colAdv = Shader.Find("COL_UPD/ColUpdate_Adv");
             var write = Shader.Find("AP/DoWrite_Col");
-            Shader colFix = null;
+            var colFix = Shader.Find("COL_UPD/ColUpdate_Fix");
 
             _colAdv = new RenderTexture(width, height, 0, GraphicsFormat.B8G8R8A8_UNorm);
+            _colFix = new RenderTexture(width, height, 0, GraphicsFormat.B8G8R8A8_UNorm);
             _rtTemp = new RenderTexture(width, height, 0, GraphicsFormat.B8G8R8A8_UNorm);
             _colAdv.Create();
             _rtTemp.Create();
+            _colFix.Create();
 
             _matColAdv = new Material(colAdv) { hideFlags = HideFlags.DontSave };
+            _matColFix = new Material(colFix) { hideFlags = HideFlags.DontSave };
             _matWrite = new Material(write) { hideFlags = HideFlags.DontSave };
             
             var delta = new Vector2(1.0f / Width, 1.0f / Height);
@@ -63,7 +68,14 @@ namespace APMaps
             _matColAdv.SetTexture(LastTex5678, _d2q9Map.F5678);
             _matColAdv.SetTexture(Last, _colAdv);
             _matColAdv.SetTexture(ColTable, APCanvasMgr.GetColTable());
+            _matWrite.SetTexture(ColTable, APCanvasMgr.GetColTable());
             _matWrite.SetTexture(DestTex, _colAdv);
+            _matColFix.SetTexture(LastTex0, _d2q9Map.F0);
+            _matColFix.SetTexture(LastTex1234, _d2q9Map.F1234);
+            _matColFix.SetTexture(LastTex5678, _d2q9Map.F5678);
+            _matColFix.SetTexture(Adv, _colAdv);
+            _matColFix.SetTexture(Fix, _colFix);
+            _matColFix.SetTexture(ColTable, APCanvasMgr.GetColTable());
         }
 
         public override void DoUpdate()
@@ -71,6 +83,8 @@ namespace APMaps
             base.DoUpdate();
             Graphics.Blit(null, _rtTemp, _matColAdv);
             Graphics.Blit(_rtTemp, _colAdv);
+            Graphics.Blit(null, _rtTemp, _matColFix);
+            Graphics.Blit(_rtTemp, _colFix);
         }
 
         public override void DoWrite(Vector4 rect, Color col, params Texture[] texs)

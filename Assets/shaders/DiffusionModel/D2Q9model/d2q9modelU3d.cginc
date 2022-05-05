@@ -25,6 +25,27 @@ AP_D2Q9_Fi ap_tex2D(
     return o;
 }
 
+/** 利用贴图构建分量信息结构体 (kp恒等于false k值恒等于0 f0恒等于0)
+ * @param tex1234 1234方向的分量贴图 xyzw 分别代表1234方向的值
+ * @param tex5678 5678方向的分量贴图
+ * @return 分量信息结构体
+ */
+AP_D2Q9_Fi ap_tex2D(
+    const sampler2D tex1234, const sampler2D tex5678,
+    const float2 uv)
+{
+    AP_D2Q9_Fi o;
+
+    o.e = 1;
+    o.k = 0;
+    o.pin = false;
+    o.f0 = 0;
+    o.f1234 = tex2D(tex1234, uv);
+    o.f5678 = tex2D(tex5678, uv);
+
+    return o;
+}
+
 /** 利用贴图构建分量信息结构体 (kp恒等于false)
  * @param tex0 0方向分量贴图 只取贴图的x值
  * @param tex1234 1234方向的分量贴图 xyzw 分别代表1234方向的值
@@ -88,5 +109,16 @@ AP_D2Q9_Fi ap_tex2D_kp(
     o.e = o.pin ? EB : 1;
     
     return o;
+}
+
+float ap_getFixtureFactor(const sampler2D tex0, const sampler2D tex1234, const sampler2D tex5678, const float2 uv)
+{
+    const float rho = ap_d2q9_getRho(ap_tex2D(tex0, tex1234, tex5678, uv));
+    const float rho_last = tex2D(tex0, uv).y;
+
+    const float loss = max(rho - rho_last, 0);
+    const float factor = loss / rho_last;
+    const float mu = clamp(MU + XI, 0, 1);
+    return max(factor * (1-smoothstep(0, mu, rho)), ETA);
 }
 #endif
