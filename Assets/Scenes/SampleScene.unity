@@ -229,7 +229,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   initTex: {fileID: 2800000, guid: 4e5acdea66e321f42a28e745586508ff, type: 3}
   radius: 0.1
-  color: {r: 0, g: 0.754717, b: 0.6775937, a: 1}
+  color: {r: 0.05660379, g: 0.05660379, b: 0.05660379, a: 1}
   gule: {fileID: 2800000, guid: ed0d754ab708cef4394460049392607b, type: 3}
   paper: {fileID: 2800000, guid: ed0d754ab708cef4394460049392607b, type: 3}
   writeTex: {fileID: 2800000, guid: 1329490957b4e18429bca624e95a57f5, type: 3}

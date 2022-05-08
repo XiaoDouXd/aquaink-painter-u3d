@@ -119,6 +119,6 @@ float ap_getFixtureFactor(const sampler2D tex0, const sampler2D tex1234, const s
     const float loss = max(rho - rho_last, 0);
     const float factor = loss / rho_last;
     const float mu = clamp(MU + XI, 0, 1);
-    return max(factor * (1-smoothstep(0, mu, rho)), ETA);
+    return clamp(factor * (1-smoothstep(0, mu, rho)), ETA, 1);
 }
 #endif

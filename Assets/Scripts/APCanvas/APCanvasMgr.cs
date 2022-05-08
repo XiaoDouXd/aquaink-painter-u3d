@@ -34,7 +34,7 @@ public class APCanvasMgr : MonoBehaviour
         if (_i == null)
         {
             _i = this;
-            // Application.targetFrameRate = 30;
+            Application.targetFrameRate = 30;
             DontDestroyOnLoad(gameObject);
         }
         else

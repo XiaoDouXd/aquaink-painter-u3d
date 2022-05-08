@@ -63,7 +63,7 @@
                 float a = lerp(pfn.w, pf.w, gamma*pfn.w);
 
                 const float factor = ap_getFixtureFactor(_LastTex0, _LastTex1234, _LastTex5678, i.uv);
-                a -= factor * a;
+                a = clamp(a - factor * a, 0, 1);
                 
                 return float4(col, a);
             }
