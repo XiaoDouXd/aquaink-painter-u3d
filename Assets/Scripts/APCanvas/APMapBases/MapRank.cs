@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 namespace AP.Canvas
 {
@@ -45,9 +43,21 @@ namespace AP.Canvas
                     var mapList = new MapBaseList(code);
                     mapList.Add(this);
                     InstList.AddBefore(inst, mapList);
+                    return;
                 }
 
                 inst = inst.Next;
+            }
+
+            if (inst.Value.Code == code)
+            {
+                inst.Value.Add(this);
+            }
+            else if (inst.Value.Code > code)
+            {
+                var mapList = new MapBaseList(code);
+                mapList.Add(this);
+                InstList.AddBefore(inst, mapList);
             }
         }
 

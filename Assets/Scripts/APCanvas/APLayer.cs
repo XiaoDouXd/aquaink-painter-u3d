@@ -1,11 +1,6 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using AP.Canvas;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
-using UnityEngine.UI;
 
 namespace AP.Canvas
 {
@@ -14,7 +9,10 @@ namespace AP.Canvas
         public RenderTexture f0;
         public RenderTexture f1234;
         public RenderTexture f5678;
+        public RenderTexture fTemp;
+        
         public RenderTexture color;
+        public RenderTexture cTemp;
     }
     
     public class Layer : MapBase
@@ -32,7 +30,7 @@ namespace AP.Canvas
         private string _name;
         private LayerBlurType _blurType;
         private APCanvasBlurMat _blurMat;
-        
+
         private static readonly int ColTable = Shader.PropertyToID("_ColTable");
         private static readonly int Adv = Shader.PropertyToID("_Adv");
         private static readonly int Fix = Shader.PropertyToID("_Fix");
@@ -57,7 +55,10 @@ namespace AP.Canvas
                 f0 = d2Q9Flow.F0,
                 f1234 = d2Q9Flow.F1234,
                 f5678 = d2Q9Flow.F5678,
+                fTemp = d2Q9Flow.FTemp,
+                
                 color = color.colAdv,
+                cTemp = color.CTemp,
             };
             
             _showMat = new Material(ShowShader) { hideFlags = HideFlags.DontSave };

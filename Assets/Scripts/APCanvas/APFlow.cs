@@ -12,6 +12,7 @@ namespace AP.Canvas
         public RenderTexture F0 => _rtF0;
         public RenderTexture F1234 => _rtF1234;
         public RenderTexture F5678 => _rtF5678;
+        public RenderTexture FTemp => _rtTemp; 
 
         private Texture _colFix;
         private Texture _glue;
@@ -47,10 +48,10 @@ namespace AP.Canvas
             _d2Q9MatF5678 = new Material(F5678Shader) { hideFlags = HideFlags.DontSave };
 
             // 初始化贴图
-            _rtF0 = new RenderTexture(width, height, 0, GraphicsFormat.R32G32B32A32_SFloat) { filterMode = FilterMode.Point };
-            _rtF1234 = new RenderTexture(width, height, 0, GraphicsFormat.R32G32B32A32_SFloat) { filterMode = FilterMode.Point };
-            _rtF5678 = new RenderTexture(width, height, 0, GraphicsFormat.R32G32B32A32_SFloat) { filterMode = FilterMode.Point };
-            _rtTemp = new RenderTexture(width, height, 0, GraphicsFormat.R32G32B32A32_SFloat) { filterMode = FilterMode.Point };
+            _rtF0 = new RenderTexture(width, height, 0, GraphicsFormat.R16G16B16A16_SFloat) { filterMode = FilterMode.Point };
+            _rtF1234 = new RenderTexture(width, height, 0, GraphicsFormat.R16G16B16A16_SFloat) { filterMode = FilterMode.Point };
+            _rtF5678 = new RenderTexture(width, height, 0, GraphicsFormat.R16G16B16A16_SFloat) { filterMode = FilterMode.Point };
+            _rtTemp = new RenderTexture(width, height, 0, GraphicsFormat.R16G16B16A16_SFloat) { filterMode = FilterMode.Point };
             _rtTemp.Create();
             _rtF0.Create();
             _rtF1234.Create();

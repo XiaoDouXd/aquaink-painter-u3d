@@ -1,4 +1,4 @@
-﻿Shader "AP/DoWrite_WaterF0"
+﻿Shader "DoWrite/WaterF1234_Round"
 {
     Properties
     {
@@ -39,13 +39,12 @@
 
             float4 frag (v2f i) : SV_Target
             {
-                float4 col = tex2D(_DestTex, i.uv);
-                // const float4 colNew = abs(tex2D(_MainTex, mainUV));
+                float4 col = tex2D(_MainTex, i.uv);
                 // 画圆
                 const unorm float DIST = abs(_rect.x - _rect.z) / 2.0;
                 float dis = distance(i.uv, (_rect.xy + _rect.zw)/2.0);
                 dis = dis <= DIST ? 1 - dis / DIST : 0;
-                float4 colNew = dis * float4(4.0/9, 4.0/9, 4.0/9, 4.0/9) + (1 - dis) * col;
+                float4 colNew = dis * float4(1.0/9, 1.0/9, 1.0/9, 1.0/9) + (1 - dis) * col;
                 
                 return colNew;
             }

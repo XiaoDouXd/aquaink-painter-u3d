@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
+using UnityEngine.UI;
 
 namespace AP.Canvas
 {
@@ -13,7 +15,11 @@ namespace AP.Canvas
         private static readonly Shader Add = Shader.Find("LayerBlur/Add");
         private static readonly Shader Overlay = Shader.Find("LayerBlur/Overlay");
         
-        private static readonly int TexCur = Shader.PropertyToID("_TexCur");
+        private static readonly int TexFix = Shader.PropertyToID("_TexCur");
+        private static readonly int ColTable = Shader.PropertyToID("_ColTable");
+        
+        private Layer _layer;
+        private Material _mat;        
         
         public APCanvasBlurMat(Layer layer, LayerBlurType type = LayerBlurType.NORMAL)
         {
@@ -22,9 +28,7 @@ namespace AP.Canvas
             
             SetType(type);
         }
-
-        private Layer _layer;
-        private Material _mat;
+        
         public void SetType(LayerBlurType type)
         {
             switch (type)
@@ -34,6 +38,7 @@ namespace AP.Canvas
                     break;
                 case LayerBlurType.REALITY:
                     _mat.shader = Reality;
+                    _mat.SetTexture(ColTable, APInitMgr.I.colorTable);
                     break;
                 case LayerBlurType.MULTIPLY:
                     _mat.shader = Multiply;
@@ -48,7 +53,7 @@ namespace AP.Canvas
                     _mat.shader = Overlay;
                     break;
             }
-            _mat.SetTexture(TexCur, _layer.Tex);
+            _mat.SetTexture(TexFix, _layer.Tex);
         }
         public void Blur(Texture layerLast, RenderTexture dest)
         {
@@ -60,6 +65,9 @@ namespace AP.Canvas
     {
         private const int MaxLayerCount = 100000;        
         public override Texture Tex => _blurTex;
+        public RawImage Surface { get; private set; }
+        public Layer this[int layerId] => _layers[layerId];
+        public int FirstLayer => _layerRank.First.Value;
 
         private static readonly Shader ClearShader = Shader.Find("Canvas/Clear0000");
         
@@ -72,11 +80,18 @@ namespace AP.Canvas
         private int _curIdxCount;
         private int _newLayerCount;
 
-        public APCanvas(int width, int height, Texture paper) : 
+        public APCanvas(int width, int height, RawImage surface, Texture paper = null) : 
             base((uint)width, (uint)height, MapRankTypes.CANVAS)
         {
             _newLayerCount = 1;
             _clear = new Material(ClearShader) { hideFlags = HideFlags.DontSave };
+            _blurTex = new RenderTexture(width, height, 0, GraphicsFormat.R8G8B8A8_UNorm);
+            _rtTemp = new RenderTexture(width, height, 0, GraphicsFormat.R8G8B8A8_UNorm);
+            _blurTex.Create();
+            _rtTemp.Create();
+            
+            Surface = surface;
+            Surface.texture = _blurTex;
             
             if (paper != null)
                 Add(paper);

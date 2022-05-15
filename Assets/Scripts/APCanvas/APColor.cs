@@ -8,6 +8,7 @@ namespace AP.Canvas
         public override Texture Tex => _colFix;
         public RenderTexture colAdv => _colAdv;
         public RenderTexture colGlue => _glue;
+        public RenderTexture CTemp => _rtTemp;
 
         private RenderTexture _glue;
         private RenderTexture _colAdv;
@@ -26,7 +27,8 @@ namespace AP.Canvas
         private static readonly int ColTable = Shader.PropertyToID("_ColTable");
         private static readonly int Adv = Shader.PropertyToID("_Adv");
         private static readonly int Fix = Shader.PropertyToID("_Fix");
-        
+
+        private static readonly Shader ColClearShader = Shader.Find("Canvas/Clear1110");
         private static readonly Shader ColAdvShader = Shader.Find("COL_UPD/ColUpdate_Adv");
         private static readonly Shader ColFixShader = Shader.Find("COL_UPD/ColUpdate_Fix");
         private static readonly Shader GlueShader = Shader.Find("COL_UPD/ColUpdate_Glue");
@@ -47,8 +49,11 @@ namespace AP.Canvas
             _matColAdv = new Material(ColAdvShader) { hideFlags = HideFlags.DontSave };
             _matColFix = new Material(ColFixShader) { hideFlags = HideFlags.DontSave };
             _matGlue = new Material(GlueShader) { hideFlags = HideFlags.DontSave };
+            var matClear1110 = new Material(ColClearShader) { hideFlags = HideFlags.DontSave };
+            Graphics.Blit(null, _colFix, matClear1110);
+            Graphics.Blit(null, _colAdv, matClear1110);
 
-            var delta = new Vector2(1.0f / Width, 1.0f / Height);
+            var delta = new Vector2(1.0f / 20, 1.0f / 20);
             _matColAdv.SetVector(Delta, delta);
             _matColAdv.SetTexture(LastTex0, d2Q9Map.F0);
             _matColAdv.SetTexture(LastTex1234, d2Q9Map.F1234);

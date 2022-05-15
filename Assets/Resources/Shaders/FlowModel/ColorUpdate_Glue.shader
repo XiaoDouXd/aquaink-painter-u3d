@@ -12,8 +12,6 @@
 
             #include "UnityCG.cginc"
             #include "d2q9modelU3d.cginc"
-            
-            #include "../PigmentUpdateModel/colmix.hlsl"
 
             struct v2f
             {

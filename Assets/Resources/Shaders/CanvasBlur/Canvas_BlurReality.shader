@@ -1,5 +1,9 @@
-﻿Shader "COL_UPD/ColUpdate_Fix"
+﻿Shader "LayerBlur/Reality"
 {
+    Properties
+    {
+        _MainTex ("Texture", 2D) = "white" {}
+    }
     SubShader
     {
         Cull Off ZWrite Off ZTest Always
@@ -11,8 +15,6 @@
             #pragma fragment frag
 
             #include "UnityCG.cginc"
-            #include "d2q9modelU3d.cginc"
-            
             #include "../ColmixModel/colmix.hlsl"
 
             struct v2f
@@ -20,7 +22,7 @@
                 float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
             };
-
+ 
             v2f vert (appdata_base v)
             {
                 v2f o;
@@ -29,26 +31,19 @@
                 return o;
             }
             
-            // 上一帧的分量数据
-            sampler2D _Adv;
-            sampler2D _Fix;
-            sampler2D _LastTex0;
-            sampler2D _LastTex1234;
-            sampler2D _LastTex5678;
+            sampler2D _MainTex;
+            sampler2D _TexCur;
 
             Texture2D _ColTable;
             SamplerState sampler_ColTable;
-            
+
             float4 frag (v2f i) : SV_Target
             {
-                const float factor = ap_getFixtureFactor(_LastTex0, _LastTex1234, _LastTex5678, i.uv);
+                const float4 col = tex2D(_MainTex, i.uv);
+                const float4 colCur = tex2D(_TexCur, i.uv);
+                const float a = lerp(colCur.a, col.a, col.a);
 
-                float4 col_a = tex2D(_Adv, i.uv);
-                float4 col_f = tex2D(_Fix, i.uv);
-                col_f.w = clamp(col_f.w + col_a.w * factor, 0, 1);
-                col_f.xyz = ap_mixbox_kmerp(col_f.xyz, col_a.xyz, (1 - col_a.w * factor), _ColTable, sampler_ColTable);
-                
-                return col_f;
+                return float4(ap_mixbox_kmerp(colCur.rgb, col.rgb, col.a, _ColTable, sampler_ColTable), a);
             }
             ENDHLSL
         }

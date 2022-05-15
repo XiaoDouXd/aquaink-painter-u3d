@@ -13,7 +13,7 @@
             #include "UnityCG.cginc"
             #include "d2q9modelU3d.cginc"
             
-            #include "../PigmentUpdateModel/colmix.hlsl"
+            #include "../ColmixModel/colmix.hlsl"
 
             struct v2f
             {
@@ -42,12 +42,12 @@
             float4 frag (v2f i) : SV_Target
             {
                 float2 v = tex2D(_LastTex0, i.uv).zw;
-                v = float2(v.x * (1/10.0), v.y * (1/10.0) );
+                v = float2(v.x *  _Delta.x, v.y * _Delta.y );
                 
                 const float4 pf = tex2D(_Last, i.uv);
                 const float4 pfn = tex2D(_Last, i.uv + v);
                 const float gamma = lerp(1, 0.1, smoothstep(0, 0.5, length(v)));
-                const float3 col = ap_mixbox_kmerp(pf.xyz, pfn.xyz, gamma*pfn.w, _ColTable, sampler_ColTable);
+                const float3 col = ap_mixbox_kmerp(pf.xyz, pfn.xyz, gamma* pfn.w, _ColTable, sampler_ColTable);
                 float a = lerp(pfn.w, pf.w, gamma*pfn.w);
 
                 const float factor = ap_getFixtureFactor(_LastTex0, _LastTex1234, _LastTex5678, i.uv);
