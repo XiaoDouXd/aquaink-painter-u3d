@@ -1,7 +1,10 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace AP.Canvas
 {
+    public class MapInfoBase { }
+    
     /// <summary>
     /// 贴图集类
     /// 用于定义贴图集: 如水贴图, 颜料贴图等
@@ -26,6 +29,10 @@ namespace AP.Canvas
         /// </summary>
         public abstract Texture Tex { get; }
         /// <summary>
+        /// 数据输出
+        /// </summary>
+        public abstract MapInfoBase Info { get; }
+        /// <summary>
         /// 刷新贴图
         /// </summary>
         public virtual void DoUpdate() { }
@@ -48,6 +55,14 @@ namespace AP.Canvas
         public virtual void DoRelease()
         {
             _mapBaseList.Remove(this);
+        }
+        /// <summary>
+        /// 写入贴图
+        /// </summary>
+        /// <param name="act"> 写入内容的方法 </param>
+        public virtual void DoWrite(Action<MapInfoBase> act)
+        {
+            act?.Invoke(Info);
         }
 
         // -----------------------------------------------------

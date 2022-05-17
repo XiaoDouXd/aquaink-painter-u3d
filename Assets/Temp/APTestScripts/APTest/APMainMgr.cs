@@ -56,11 +56,13 @@ public class APMainMgr : MonoBehaviour
         
         // 初始化
         //_flow.DoWrite(null, Vector4.zero, initTex, initTex, initTex);
-        visualization.SetTexture("_LastTex0", _flow.F0);
-        visualization.SetTexture("_LastTex1234", _flow.F1234);
-        visualization.SetTexture("_LastTex5678", _flow.F5678);
-        visualization.SetTexture("_Adv", _col.colAdv);
-        visualization.SetTexture("_Fix", _col.Tex);
+        var flowData = _flow.Info as APFlowInfo;
+        var colData = _col.Info as APColorInfo;
+        visualization.SetTexture("_LastTex0", flowData?.f0);
+        visualization.SetTexture("_LastTex1234", flowData?.f1234);
+        visualization.SetTexture("_LastTex5678", flowData?.f5678);
+        visualization.SetTexture("_Adv", colData?.adv);
+        visualization.SetTexture("_Fix", colData?.glue);
         visualization.SetTexture("_ColTable", colTable);
     }
 
@@ -87,7 +89,7 @@ public class APMainMgr : MonoBehaviour
         
         _flow.DoUpdate();
         _col.DoUpdate();
-        Graphics.Blit(_col.Tex, _target, visualization);
+        //Graphics.Blit(_col.Tex, _target, visualization);
     }
 
     // private void OnRenderImage(RenderTexture src, RenderTexture dest)

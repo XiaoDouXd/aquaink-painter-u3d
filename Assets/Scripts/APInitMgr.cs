@@ -19,7 +19,7 @@ public class APInitMgr : MonoBehaviour
     [Tooltip("默认纸张纹理")]
     public Texture2D defaultPaper5;
     [Tooltip("UI根节点")]
-    public RectTransform uiRoot;
+    public RectTransform surfaceRoot;
     
     // ---------------------------------------------------------------------------
     // 渲染初始化
@@ -27,12 +27,12 @@ public class APInitMgr : MonoBehaviour
     {
         var canvas = Instantiate(
             APPrefabMgr.I.surfaceObj,
-            uiRoot.transform);
+            surfaceRoot.transform);
         canvas.GetComponent<APCanvasUI>().Init(
             new APCanvasInfo()
             {
-                width = 2048,
-                height = 2048,
+                width = 1024,
+                height = 1024,
                 paper = defaultPaper1,
             });
         canvas.SetActive(true);
@@ -49,8 +49,8 @@ public class APInitMgr : MonoBehaviour
         if (_i == null)
         {
             _i = this;
-            Application.targetFrameRate = 60;
-            DontDestroyOnLoad(transform.parent);
+            //Application.targetFrameRate = 60;
+            DontDestroyOnLoad(gameObject);
         }
         else
             Destroy(gameObject);

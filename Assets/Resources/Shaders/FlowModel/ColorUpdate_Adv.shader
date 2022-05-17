@@ -32,17 +32,15 @@
             // 上一帧的分量数据
             float2 _Delta;
             sampler2D _Last;
-            sampler2D _LastTex0;
-            sampler2D _LastTex1234;
-            sampler2D _LastTex5678;
+            sampler2D _Flow;
 
             Texture2D _ColTable;
             SamplerState sampler_ColTable;
             
             float4 frag (v2f i) : SV_Target
             {
-                float2 v = tex2D(_LastTex0, i.uv).zw;
-                v = float2(v.x *  _Delta.x, v.y * _Delta.y );
+                float4 flow = tex2D(_Flow, i.uv);
+                float2 v = float2(flow.z *  _Delta.x, flow.w * _Delta.y );
                 
                 const float4 pf = tex2D(_Last, i.uv);
                 const float4 pfn = tex2D(_Last, i.uv + v);
@@ -50,7 +48,7 @@
                 const float3 col = ap_mixbox_kmerp(pf.xyz, pfn.xyz, gamma* pfn.w, _ColTable, sampler_ColTable);
                 float a = lerp(pfn.w, pf.w, gamma*pfn.w);
 
-                const float factor = ap_getFixtureFactor(_LastTex0, _LastTex1234, _LastTex5678, i.uv);
+                const float factor = ap_getFixtureFactor(flow);
                 a = clamp(a - factor * a, 0, 1);
                 
                 return float4(col, a);

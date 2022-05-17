@@ -1,9 +1,5 @@
-﻿Shader "Layer/Show"
+﻿Shader "COL_UPD/ColUpdate_Show"
 {
-    Properties
-    {
-        _MainTex ("Texture", 2D) = "white" {}
-    }
     SubShader
     {
         Cull Off ZWrite Off ZTest Always

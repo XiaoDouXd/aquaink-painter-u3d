@@ -11,6 +11,7 @@ namespace AP.Canvas
     public class MapFlowD2Q4 : MapBase
     {
         public override Texture Tex => _rtF1234;
+        public override MapInfoBase Info => null;
 
         private RenderTexture _rtF1234;
         private RenderTexture _rtTemp;

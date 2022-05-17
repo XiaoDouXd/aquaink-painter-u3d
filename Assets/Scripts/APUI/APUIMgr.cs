@@ -1,19 +1,22 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Canvas))]
 public class APUIMgr : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    public GameObject UIRoot => gameObject;
+    
+    #region 单例类
+    public static APUIMgr I => _i;
+    private static APUIMgr _i;
+    
+    private void Awake()
     {
-        
+        if (_i == null)
+        {
+            _i = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+            Destroy(gameObject);
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    #endregion
 }

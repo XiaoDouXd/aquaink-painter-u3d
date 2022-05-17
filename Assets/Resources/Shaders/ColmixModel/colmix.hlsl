@@ -92,7 +92,7 @@ AP_COLMIX_Latent __AP_COLMIX_PRIVATE_rgbToLatent(const float3 rgb, Texture2D c_t
     i_rgb.b = i_rgb.b + 1;
     i_rgb.g = i_rgb.g + 1;
     
-    // 神秘的c
+    // 各颜料的浓度值
     float4 c = float4(0, 0, 0, 0);
     c.rgb +=                                        (1-t_rgb.r)*(1-t_rgb.g)*(1-t_rgb.b)*c_table.Sample(samplerState, (pos )/4096.0).rgb;
     c.rgb += i_rgb.r >= 255 ? 0 :                     (t_rgb.r)*(1-t_rgb.g)*(1-t_rgb.b)*c_table.Sample(samplerState, (pos1)/4096.0).rgb;
@@ -104,7 +104,7 @@ AP_COLMIX_Latent __AP_COLMIX_PRIVATE_rgbToLatent(const float3 rgb, Texture2D c_t
     c.rgb += i_rgb.b >= 255 || i_rgb.g >= 255 || i_rgb.r >= 255 ? 0 : (t_rgb.r)*(t_rgb.g)*(t_rgb.b)*c_table.Sample(samplerState, (pos7)/4096.0).rgb;
     c.a = 1.0 - (c.r + c.g + c.b);
 
-    // 拿到subrgb
+    // 修正项
     float3 mixrgb = __AP_COLMIX_PRIVATE_mix(c);
     AP_COLMIX_Latent o;
     o.c = c;

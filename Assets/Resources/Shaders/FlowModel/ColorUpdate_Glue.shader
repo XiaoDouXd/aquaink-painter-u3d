@@ -11,7 +11,6 @@
             #pragma fragment frag
 
             #include "UnityCG.cginc"
-            #include "d2q9modelU3d.cginc"
 
             struct v2f
             {
@@ -30,14 +29,12 @@
             // 上一帧的分量数据
             float2 _Delta;
             sampler2D _Last;
-            sampler2D _LastTex0;
-            sampler2D _LastTex1234;
-            sampler2D _LastTex5678;
+            sampler2D _Flow;
             
             float frag (v2f i) : SV_Target
             {
-                const AP_D2Q9_Fi fi = ap_tex2D(_LastTex0, _LastTex1234, _LastTex5678, i.uv);
-                float2 v = ap_d2q9_getVelocity(fi);
+                float4 flow = tex2D(_Flow, i.uv);
+                float2 v = flow.zw;
                 v = float2(v.x * (1/10.0), v.y * (1/10.0) );
                 
                 const float pf = tex2D(_Last, i.uv).r;

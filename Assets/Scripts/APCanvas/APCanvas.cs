@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
@@ -18,10 +19,10 @@ namespace AP.Canvas
         private static readonly int TexFix = Shader.PropertyToID("_TexCur");
         private static readonly int ColTable = Shader.PropertyToID("_ColTable");
         
-        private Layer _layer;
+        private APLayer _layer;
         private Material _mat;        
         
-        public APCanvasBlurMat(Layer layer, LayerBlurType type = LayerBlurType.NORMAL)
+        public APCanvasBlurMat(APLayer layer, LayerBlurType type = LayerBlurType.NORMAL)
         {
             _layer = layer;
             _mat = new Material(Normal);
@@ -61,12 +62,13 @@ namespace AP.Canvas
         }
     }
     
-    public class APCanvas : MapBase
+    public class APCanvas : MapBase, IEnumerable<APLayer>
     {
         private const int MaxLayerCount = 100000;        
         public override Texture Tex => _blurTex;
+        public override MapInfoBase Info => null;
         public RawImage Surface { get; private set; }
-        public Layer this[int layerId] => _layers[layerId];
+        public APLayer this[int layerId] => _layers[layerId];
         public int FirstLayer => _layerRank.First.Value;
 
         private static readonly Shader ClearShader = Shader.Find("Canvas/Clear0000");
@@ -75,7 +77,7 @@ namespace AP.Canvas
         private RenderTexture _rtTemp;
         private Material _clear;
         
-        private readonly Dictionary<int, Layer> _layers = new Dictionary<int, Layer>();
+        private readonly Dictionary<int, APLayer> _layers = new Dictionary<int, APLayer>();
         private readonly LinkedList<int> _layerRank = new LinkedList<int>();
         private int _curIdxCount;
         private int _newLayerCount;
@@ -85,7 +87,10 @@ namespace AP.Canvas
         {
             _newLayerCount = 1;
             _clear = new Material(ClearShader) { hideFlags = HideFlags.DontSave };
-            _blurTex = new RenderTexture(width, height, 0, GraphicsFormat.R8G8B8A8_UNorm);
+            _blurTex = new RenderTexture(width, height, 0, GraphicsFormat.R8G8B8A8_UNorm)
+            {
+                filterMode = FilterMode.Point,
+            };
             _rtTemp = new RenderTexture(width, height, 0, GraphicsFormat.R8G8B8A8_UNorm);
             _blurTex.Create();
             _rtTemp.Create();
@@ -135,7 +140,7 @@ namespace AP.Canvas
         }
         public void Add()
         {
-            var layer = new Layer(Width, Height, APInitMgr.I.defaultPaper1, NewIdx());
+            var layer = new APLayer(Width, Height, APInitMgr.I.defaultPaper1, NewIdx());
             layer.Name = $"新建图层{_newLayerCount}";
 
             _layers.Add(layer.Id, layer);
@@ -143,11 +148,39 @@ namespace AP.Canvas
         }
         public void Add(Texture paper)
         {
-            var layer = new Layer(Width, Height, paper, NewIdx());
+            var layer = new APLayer(Width, Height, paper, NewIdx());
             layer.Name = $"新建图层{_newLayerCount}";
             
             _layers.Add(layer.Id, layer);
             _layerRank.AddLast(layer.Id);
+        }
+        public override void DoUpdate()
+        {
+            base.DoUpdate();
+
+            Graphics.Blit(null, _blurTex, _clear);
+            foreach (var layerId in _layerRank)
+            {
+                if (!_layers.ContainsKey(layerId))
+                    throw new ApplicationException("APCanvas.DoUpdate: 错误！引用了不存在的图层！");
+                
+                _layers[layerId].Blur.Blur(_blurTex, _rtTemp);
+                Graphics.Blit(_rtTemp, _blurTex);
+            }
+        }
+        public IEnumerator<APLayer> GetEnumerator()
+        {
+            if (_layerRank == null)
+                yield break;
+
+            foreach (var layer in _layerRank)
+            {
+                yield return _layers[layer];
+            }
+        }
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
         private int NewIdx()
         {
@@ -166,20 +199,6 @@ namespace AP.Canvas
             }
 
             return _curIdxCount;
-        }
-        public override void DoUpdate()
-        {
-            base.DoUpdate();
-
-            Graphics.Blit(null, _blurTex, _clear);
-            foreach (var layerId in _layerRank)
-            {
-                if (!_layers.ContainsKey(layerId))
-                    throw new ApplicationException("APCanvas.DoUpdate: 错误！引用了不存在的图层！");
-                
-                _layers[layerId].Blur.Blur(_blurTex, _rtTemp);
-                Graphics.Blit(_rtTemp, _blurTex);
-            }
         }
     }
 }

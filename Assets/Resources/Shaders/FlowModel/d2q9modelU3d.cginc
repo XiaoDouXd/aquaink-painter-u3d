@@ -113,10 +113,10 @@ AP_D2Q9_Fi ap_tex2D_kp(
     return o;
 }
 
-float ap_getFixtureFactor(const sampler2D tex0, const sampler2D tex1234, const sampler2D tex5678, const float2 uv)
+float ap_getFixtureFactor(float4 flow)
 {
-    const float rho = ap_d2q9_getRho(ap_tex2D(tex0, tex1234, tex5678, uv));
-    const float rho_last = tex2D(tex0, uv).y;
+    const float rho = flow.x;
+    const float rho_last = flow.y;
 
     const float loss = max(rho - rho_last, 0);
     const float factor = loss / rho_last;

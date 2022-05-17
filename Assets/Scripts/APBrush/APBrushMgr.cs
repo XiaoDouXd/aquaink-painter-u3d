@@ -63,6 +63,9 @@ namespace AP.Brush
             
             _canvas[layerId]?.DoWrite((info) =>
             {
+                var data = info as APLayerInfo;
+                if (data == null) return;
+                
                 // 绑定资源
                 _matWrite0.SetVector(Rect1, rect);
                 _matWrite1234.SetVector(Rect1, rect);
@@ -70,17 +73,17 @@ namespace AP.Brush
                 _matColor.SetVector(Rect1, rect);
                 
                 // 写入
-                Graphics.Blit(info.f0, info.fTemp, _matWrite0);
-                Graphics.Blit(info.fTemp, info.f0);
-                Graphics.Blit(info.f1234, info.fTemp, _matWrite1234);
-                Graphics.Blit(info.fTemp, info.f1234);
-                Graphics.Blit(info.f5678, info.fTemp, _matWrite5678);
-                Graphics.Blit(info.fTemp, info.f5678);
-                Graphics.Blit(info.color, info.cTemp, _matColor);
-                Graphics.Blit(info.cTemp, info.color);
+                Graphics.Blit(data.f0, data.fTemp, _matWrite0);
+                Graphics.Blit(data.fTemp, data.f0);
+                Graphics.Blit(data.f1234, data.fTemp, _matWrite1234);
+                Graphics.Blit(data.fTemp, data.f1234);
+                Graphics.Blit(data.f5678, data.fTemp, _matWrite5678);
+                Graphics.Blit(data.fTemp, data.f5678);
+                Graphics.Blit(data.color, data.cTemp, _matColor);
+                Graphics.Blit(data.cTemp, data.color);
             });
         }
-        public static (Vector2, bool) Window2Canvas(RectTransform canvasTrans, Vector2 windowPos)
+        public static (Vector2 pos, bool isInside) Window2Canvas(RectTransform canvasTrans, Vector2 windowPos)
         {
             windowPos -= APInitMgr.I.WindowCenter + canvasTrans.anchoredPosition;
             

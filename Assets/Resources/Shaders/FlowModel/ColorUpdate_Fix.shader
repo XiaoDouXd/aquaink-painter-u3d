@@ -32,16 +32,14 @@
             // 上一帧的分量数据
             sampler2D _Adv;
             sampler2D _Fix;
-            sampler2D _LastTex0;
-            sampler2D _LastTex1234;
-            sampler2D _LastTex5678;
+            sampler2D _Flow;
 
             Texture2D _ColTable;
             SamplerState sampler_ColTable;
             
             float4 frag (v2f i) : SV_Target
             {
-                const float factor = ap_getFixtureFactor(_LastTex0, _LastTex1234, _LastTex5678, i.uv);
+                const float factor = ap_getFixtureFactor(tex2D(_Flow, i.uv));
 
                 float4 col_a = tex2D(_Adv, i.uv);
                 float4 col_f = tex2D(_Fix, i.uv);

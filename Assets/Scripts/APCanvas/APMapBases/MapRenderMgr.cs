@@ -9,7 +9,7 @@ namespace AP.Canvas
     /// </summary>
     public class MapRenderer
     {
-        private const float MaxRenderTimeSlice = 1.0f / 24.0f;
+        private const float MaxRenderTimeSlice = 1.0f / 60.0f;
         
         public static MapRenderer I
         {

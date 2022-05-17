@@ -37,15 +37,14 @@
             sampler2D _LastTex1234;
             sampler2D _LastTex5678;
             
-            float4 frag (v2f i) : SV_Target
+            float2 frag (v2f i) : SV_Target
             {
                 // PIX_C
                 const AP_D2Q9_Fi f0 = ap_tex2D_kp(_LastTex0, _LastTex1234, _LastTex5678, i.uv, _Delta, _Paper, _Glue, _Fix);
                 const float r = ap_d2q9_getRho(f0);
                 const float o = ap_d2q9_updateDataF0(f0, alpha, omega);
-                const float2 v = ap_d2q9_getVelocity(f0);
                 
-                return float4(o, r, v);
+                return float2(o, r);
             }
             ENDHLSL
         }

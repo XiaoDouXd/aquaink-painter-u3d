@@ -3,20 +3,31 @@ using UnityEngine.Experimental.Rendering;
 
 namespace AP.Canvas
 {
+    public class APFlowInfo : MapInfoBase
+    {
+        public RenderTexture f0;
+        public RenderTexture f1234;
+        public RenderTexture f5678;
+        public RenderTexture fTemp;
+    }
+    
     /// <summary>
     /// 基于D2Q9的流体更新
     /// </summary>
     public class APFlow : MapBase
     {
-        public override Texture Tex => _rtF0;
-        public RenderTexture F0 => _rtF0;
-        public RenderTexture F1234 => _rtF1234;
-        public RenderTexture F5678 => _rtF5678;
-        public RenderTexture FTemp => _rtTemp; 
+        public override Texture Tex => _tex;
+        public override MapInfoBase Info => new APFlowInfo() {
+            f0 = _rtF0,
+            f1234 = _rtF1234,
+            f5678 = _rtF5678,
+            fTemp = _rtTemp
+        };
 
         private Texture _colFix;
         private Texture _glue;
         private Texture _paper;
+        private RenderTexture _tex;
         private RenderTexture _rtF0;
         private RenderTexture _rtF1234;
         private RenderTexture _rtF5678;
@@ -25,6 +36,7 @@ namespace AP.Canvas
         private readonly Material _d2Q9MatF0;
         private readonly Material _d2Q9MatF1234;
         private readonly Material _d2Q9MatF5678;
+        private readonly Material _showMat;
 
         private static readonly int LastTex0 = Shader.PropertyToID("_LastTex0");
         private static readonly int LastTex1234 = Shader.PropertyToID("_LastTex1234");
@@ -33,7 +45,8 @@ namespace AP.Canvas
         private static readonly int Paper = Shader.PropertyToID("_Paper");
         private static readonly int Glue = Shader.PropertyToID("_Glue");
         private static readonly int ColFix = Shader.PropertyToID("_Fix");
-        
+
+        private static readonly Shader ShowShader = Shader.Find("LBM_SRT/D2Q9Update_Show");
         private static readonly Shader F0Shader = Shader.Find("LBM_SRT/D2Q9Update_F0");
         private static readonly Shader F1234Shader = Shader.Find("LBM_SRT/D2Q9Update_F1234");
         private static readonly Shader F5678Shader = Shader.Find("LBM_SRT/D2Q9Update_F5678");
@@ -46,12 +59,15 @@ namespace AP.Canvas
             _d2Q9MatF0 = new Material(F0Shader) { hideFlags = HideFlags.DontSave };
             _d2Q9MatF1234 = new Material(F1234Shader) { hideFlags = HideFlags.DontSave };
             _d2Q9MatF5678 = new Material(F5678Shader) { hideFlags = HideFlags.DontSave };
+            _showMat = new Material(ShowShader) { hideFlags = HideFlags.DontSave };
 
             // 初始化贴图
-            _rtF0 = new RenderTexture(width, height, 0, GraphicsFormat.R16G16B16A16_SFloat) { filterMode = FilterMode.Point };
+            _tex = new RenderTexture(width, height, 0, GraphicsFormat.R16G16B16A16_SFloat) { filterMode = FilterMode.Point };
+            _rtF0 = new RenderTexture(width, height, 0, GraphicsFormat.R16G16_SFloat) { filterMode = FilterMode.Point };
             _rtF1234 = new RenderTexture(width, height, 0, GraphicsFormat.R16G16B16A16_SFloat) { filterMode = FilterMode.Point };
             _rtF5678 = new RenderTexture(width, height, 0, GraphicsFormat.R16G16B16A16_SFloat) { filterMode = FilterMode.Point };
             _rtTemp = new RenderTexture(width, height, 0, GraphicsFormat.R16G16B16A16_SFloat) { filterMode = FilterMode.Point };
+            _tex.Create();
             _rtTemp.Create();
             _rtF0.Create();
             _rtF1234.Create();
@@ -71,6 +87,10 @@ namespace AP.Canvas
             _d2Q9MatF5678.SetTexture(LastTex0, _rtF0);
             _d2Q9MatF5678.SetTexture(LastTex1234, _rtF1234);
             _d2Q9MatF5678.SetTexture(LastTex5678, _rtF5678);
+            
+            _showMat.SetTexture(LastTex0, _rtF0);
+            _showMat.SetTexture(LastTex1234, _rtF1234);
+            _showMat.SetTexture(LastTex5678, _rtF5678);
 
             SetPaper(paper);
         }
@@ -84,11 +104,13 @@ namespace AP.Canvas
             Graphics.Blit(_rtTemp, _rtF1234);
             Graphics.Blit(null, _rtTemp, _d2Q9MatF5678);
             Graphics.Blit(_rtTemp, _rtF5678);
+            Graphics.Blit(null, _tex, _showMat);
         }
         public void SetGlueAndFix(APColor col)
         {
-            _glue = col.colGlue;
-            _colFix = col.Tex;
+            var colInfo = col.Info as APColorInfo;
+            _glue = colInfo?.glue;
+            _colFix = colInfo?.fix;
             
             _d2Q9MatF0.SetTexture(Glue, _glue);
             _d2Q9MatF0.SetTexture(ColFix, _colFix);
