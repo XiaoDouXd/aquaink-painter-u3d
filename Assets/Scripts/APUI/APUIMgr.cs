@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class APUIMgr : MonoBehaviour
 {
@@ -41,7 +42,7 @@ public class APUIMgr : MonoBehaviour
         
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 rt, 
-                Input.mousePosition, 
+                Mouse.current.position.ReadValue(), 
                 Camera.main, 
                 out var pos);
 

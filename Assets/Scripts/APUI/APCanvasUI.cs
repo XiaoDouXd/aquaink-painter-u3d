@@ -2,6 +2,7 @@ using AP.Brush;
 using AP.Canvas;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace AP.UI
@@ -116,7 +117,7 @@ namespace AP.UI
             
             _brush?.SetColor(APSamplerMgr.I.CurColor);
 
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (Keyboard.current.spaceKey.wasPressedThisFrame)
             {
                 LerpResetSize();
             }
