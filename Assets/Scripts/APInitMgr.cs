@@ -25,9 +25,9 @@ public class APInitMgr : MonoBehaviour
     // 渲染初始化
     private void Start()
     {
-        var canvas = Instantiate(
-            APPrefabMgr.I.surfaceObj,
-            surfaceRoot.transform);
+        var canvas = APAssetObjMgr.CanvasObjs.Clone(
+            "SurfaceObj",
+            surfaceRoot.gameObject);
         canvas.GetComponent<APCanvasUI>().Init(
             new APCanvasInfo()
             {
@@ -49,7 +49,8 @@ public class APInitMgr : MonoBehaviour
         if (_i == null)
         {
             _i = this;
-            //Application.targetFrameRate = 60;
+            // 锁帧
+            Application.targetFrameRate = 120;
             DontDestroyOnLoad(gameObject);
         }
         else

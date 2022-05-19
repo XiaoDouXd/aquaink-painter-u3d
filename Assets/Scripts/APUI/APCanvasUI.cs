@@ -15,8 +15,6 @@ namespace AP.UI
 
     public class APCanvasUI : MonoBehaviour, IDragHandler, IPointerDownHandler, IScrollHandler
     {
-        public Color brushColor;
-
         public bool Inited => _inited;
         
         private APCanvas _canvas;
@@ -116,7 +114,7 @@ namespace AP.UI
         {
             if (!_inited) return;
             
-            _brush?.SetColor(brushColor);
+            _brush?.SetColor(APSamplerMgr.I.CurColor);
 
             if (Input.GetKeyDown(KeyCode.Space))
             {

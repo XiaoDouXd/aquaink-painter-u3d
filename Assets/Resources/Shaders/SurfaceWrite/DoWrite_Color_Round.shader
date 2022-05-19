@@ -15,6 +15,7 @@
             #pragma fragment frag
 
             #include "UnityCG.cginc"
+            #include "../ColmixModel/colmix.hlsl"
 
             struct v2f
             {
@@ -38,6 +39,8 @@
             float4 _rect;
 
             float4 _color;
+            Texture2D _ColTable;
+            SamplerState sampler_ColTable;
 
             float4 frag (v2f i) : SV_Target
             {
@@ -46,9 +49,12 @@
                 const unorm float DIST = abs(_rect.x - _rect.z) / 2.0;
                 float dis = distance(i.uv, (_rect.xy + _rect.zw)/2.0);
                 dis = dis <= DIST ? 1 - dis / DIST : 0;
-                float4 colNew = dis * _color + (1 - dis) * col;
+                _color.a *= dis;
                 
-                return colNew;
+                float3 colNew = ap_mixbox_kmerp(col.xyz, _color.xyz, _color.a, _ColTable, sampler_ColTable);
+                float a = col.a + _color.a;
+                
+                return float4(colNew, a);
             }
             ENDHLSL
         }

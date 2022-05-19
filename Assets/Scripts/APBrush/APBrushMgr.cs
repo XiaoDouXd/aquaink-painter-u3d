@@ -36,6 +36,7 @@ namespace AP.Brush
         
         private static readonly int Rect1 = Shader.PropertyToID("_rect");
         private static readonly int Color1 = Shader.PropertyToID("_color");
+        private static readonly int ColTable = Shader.PropertyToID("_ColTable");
 
         public APBrush(APCanvas canvas)
         {
@@ -46,6 +47,8 @@ namespace AP.Brush
             _matWrite1234 = new Material(WriteF1234) { hideFlags = HideFlags.DontSave };
             _matWrite5678 = new Material(WriteF5678) { hideFlags = HideFlags.DontSave };
             _matColor = new Material(ColorShader) { hideFlags = HideFlags.DontSave };
+            
+            _matColor.SetTexture(ColTable, APInitMgr.I.colorTable);
         }
 
         public void SetColor(Color color)
