@@ -1,10 +1,13 @@
 using System;
 using System.ComponentModel;
+using AP.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class APLeftPanelTabItemUI : MonoBehaviour
 {
+    public bool IsDebut => _debuting;
+    
     public Action<APLeftPanelTabItemUI> debutComplete;
     public Action<APLeftPanelTabItemUI> startComplete;
 
@@ -47,20 +50,20 @@ public class APLeftPanelTabItemUI : MonoBehaviour
         _text.text = tabName.Substring(0, Mathf.Max(tabName.Length-1, 0) );
         _defaultSize.y = _text.preferredHeight + 50;
         _rectTransform.sizeDelta = new Vector2(0, _defaultSize.y);
-        _info.select = Select;
-        _info.deselect = Deselect;
-        
+        _info.select += Select;
+        _info.deselect += Deselect;
+
         _inited = true;
         
         Debut();
     }
     
-    private void Select()
+    private void Select(UITabInfo info)
     {
         _button.Select();
         _info.isChosen = true;
     }
-    private void Deselect()
+    private void Deselect(UITabInfo info)
     {
         _button.OnDeselect(null);
         _info.isChosen = true;
@@ -82,10 +85,5 @@ public class APLeftPanelTabItemUI : MonoBehaviour
         _started = true;
 
         startComplete?.Invoke(this);
-    }
-
-    private void Update()
-    {
-
     }
 }

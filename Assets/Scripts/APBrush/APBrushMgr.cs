@@ -22,6 +22,7 @@ namespace AP.Brush
         private APCanvas _canvas;
         private int _curLayer;
         private float _radius = 0.08f;
+        private float _wet;
         private Color _color;
 
         private static readonly Shader WriteF0 = Shader.Find("DoWrite/WaterF0_Round");
@@ -37,6 +38,7 @@ namespace AP.Brush
         private static readonly int Rect1 = Shader.PropertyToID("_rect");
         private static readonly int Color1 = Shader.PropertyToID("_color");
         private static readonly int ColTable = Shader.PropertyToID("_ColTable");
+        private static readonly int Wet = Shader.PropertyToID("_wet");
 
         public APBrush(APCanvas canvas)
         {
@@ -55,14 +57,46 @@ namespace AP.Brush
         {
             _color = color;
         }
+
+        public void SetWet(float wet)
+        {
+            _wet = wet;
+        }
+
+        public void SetRadius(float radius)
+        {
+            _radius = radius;
+        }
+        
         public void DoWrite(Vector2 pos)
         {
             DoWrite(_curLayer, pos);
         }
         public void DoWrite(int layerId, Vector2 pos)
         {
-            Vector4 rect = new Vector4(pos.x - _radius, pos.y - _radius, pos.x + _radius, pos.y + _radius);
+            var w = _canvas.Width;
+            var h = _canvas.Height;
+            var radiusW = 0.0f; 
+            var radiusH = 0.0f;
+            if (w > h)
+            {
+                var aspect = (float)h / w;
+                radiusW = _radius * aspect;
+                radiusH = _radius;
+            }
+            else
+            {
+                var aspect = (float)w / h;
+                radiusW = _radius;
+                radiusH = _radius * aspect;
+            }
+            
+            Vector4 rect = new Vector4(pos.x - radiusW, pos.y - radiusH, pos.x + radiusW, pos.y + radiusH);
+            
             _matColor.SetColor(Color1, _color);
+            _matWrite0.SetFloat(Wet, _wet);
+            _matWrite1234.SetFloat(Wet, _wet);
+            _matWrite5678.SetFloat(Wet, _wet);
             
             _canvas[layerId]?.DoWrite((info) =>
             {

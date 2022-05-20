@@ -69,7 +69,7 @@ namespace AP.Canvas
             Graphics.Blit(null, _colFix, matClear1110);
             Graphics.Blit(null, _colAdv, matClear1110);
 
-            var delta = new Vector2(1.0f / 20, 1.0f / 20);
+            var delta = new Vector2(1.0f * width / 60000, 1.0f * height / 60000);
             _matColAdv.SetVector(Delta, delta);
             _matColAdv.SetTexture(Flow, d2Q9Map.Tex);
             _matColAdv.SetTexture(Last, _colAdv);

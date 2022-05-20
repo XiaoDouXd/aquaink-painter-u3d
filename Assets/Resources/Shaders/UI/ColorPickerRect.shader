@@ -126,7 +126,7 @@ Shader "AP/UI/ColorPickerRect"
                 color.a *= m.x * m.y;
                 
                 #endif
-
+                
                 #ifdef UNITY_UI_ALPHACLIP
                 clip (color.a - 0.001);
                 #endif

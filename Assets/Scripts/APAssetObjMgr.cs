@@ -23,9 +23,18 @@ public class APAssetObjMgr : MonoBehaviour
         var obj = _objs[objName];
         if (!obj) return null;
         if (parent)
-            return Instantiate(obj, parent.transform);
+        {
+            var o = Instantiate(obj, parent.transform);
+            o.SetActive(true);
+            return o;
+        }
         else
-            return Instantiate(obj, obj.transform.parent);
+        {
+            var o = Instantiate(obj);
+            o.SetActive(true);
+            return o;
+        }
+            
     }
     
     #region 多例类
@@ -73,6 +82,7 @@ public class APAssetObjMgr : MonoBehaviour
         foreach (var obj in objs)
         {
             _objs[obj.name] = obj;
+            obj.SetActive(false);
         }
     }
     #endregion

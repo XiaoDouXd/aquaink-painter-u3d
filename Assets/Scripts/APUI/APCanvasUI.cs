@@ -58,29 +58,6 @@ namespace AP.UI
         }
 
         //--------------------------------------------------------- UI刷新
-        private void ResetSize()
-        {
-            if (!_inited) return;
-            
-            _proportion = (double)_canvas.Width / _canvas.Height;
-            var windowProp = (double)APInitMgr.I.WindowSize.x / APInitMgr.I.WindowSize.y;
-
-            _background.anchoredPosition = new Vector2(0, 0);
-            _background.localScale = new Vector3(1, 1, 1);
-            if (windowProp >= _proportion)
-            {
-                // 找到合适的高
-                var h = APInitMgr.I.WindowSize.y * 0.8f;
-                _background.sizeDelta = new Vector2((float)(h * _proportion) , h);
-
-            }
-            else
-            {
-                // 找到合适的宽
-                var w = APInitMgr.I.WindowSize.x * 0.8f;
-                _background.sizeDelta = new Vector2(w , (float)(w / _proportion));
-            }
-        }
         private void LerpResetSize()
         {
             if (!_inited) return;
@@ -116,6 +93,24 @@ namespace AP.UI
             if (!_inited) return;
             
             _brush?.SetColor(APSamplerMgr.I.CurColor);
+            if (Pen.current.pressure.IsPressed())
+            {
+                _brush?.SetRadius(Mathf.Lerp(
+                    APSamplerMgr.I.PenSizeMin,
+                    APSamplerMgr.I.PenSizeMax,
+                    Pen.current.pressure.ReadValue()));
+                _brush?.SetWet(Mathf.Lerp(
+                    APSamplerMgr.I.WetMin,
+                    APSamplerMgr.I.WetMax,
+                    Pen.current.pressure.ReadValue()
+                    ));
+            }
+            else
+            {
+                _brush?.SetRadius(APSamplerMgr.I.PenSizeMax);
+                _brush?.SetWet(APSamplerMgr.I.WetMax);
+            }
+            
 
             if (Keyboard.current.spaceKey.wasPressedThisFrame)
             {
@@ -135,7 +130,9 @@ namespace AP.UI
                 return;
             }
             
-            if (eventData.button == PointerEventData.InputButton.Left)
+            if (
+                eventData.button == PointerEventData.InputButton.Left 
+            )
                 Draw(eventData.position);
         }
         public void OnPointerDown(PointerEventData eventData)
@@ -150,7 +147,6 @@ namespace AP.UI
         {
             if (!_inited) return;
             if (_moving) return;
-            
             var posC = APBrush.Window2Canvas(_background, pos);
             if (posC.isInside)
             {

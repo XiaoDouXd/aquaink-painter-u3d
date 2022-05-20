@@ -87,6 +87,8 @@ namespace AP.UI
         }
         private void Start()
         {
+            colorPicked = APSamplerMgr.I.CurColor;
+            
             rect.SetPicker(this);
             ring.SetPicker(this);
             sliderA.SetPicker(this);

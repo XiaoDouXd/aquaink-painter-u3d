@@ -1,5 +1,4 @@
 using AP.Canvas;
-using AP.UI;
 using UnityEngine;
 
 public class APInitMgr : MonoBehaviour
@@ -23,19 +22,10 @@ public class APInitMgr : MonoBehaviour
     
     // ---------------------------------------------------------------------------
     // 渲染初始化
+    private RenderTexture _tex;
     private void Start()
     {
-        var canvas = APAssetObjMgr.CanvasObjs.Clone(
-            "SurfaceObj",
-            surfaceRoot.gameObject);
-        canvas.GetComponent<APCanvasUI>().Init(
-            new APCanvasInfo()
-            {
-                width = 1024,
-                height = 1024,
-                paper = defaultPaper1,
-            });
-        canvas.SetActive(true);
+        RenderReset();
         StartCoroutine(MapRenderer.I.RenderCoroutine());
     }
 
@@ -60,5 +50,10 @@ public class APInitMgr : MonoBehaviour
     #region 工具函数
     public Vector2 WindowCenter => new Vector2(Screen.width/2.0f, Screen.height/2.0f);
     public Vector2 WindowSize => new Vector2(Screen.width, Screen.height);
+
+    public void RenderReset()
+    {
+        MapRenderer.I.Refresh();
+    }
     #endregion
 }

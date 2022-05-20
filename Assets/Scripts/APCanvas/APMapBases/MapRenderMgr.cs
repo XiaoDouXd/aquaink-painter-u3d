@@ -23,9 +23,11 @@ namespace AP.Canvas
         private static MapRenderer _i;
         
         private float _timeCount;
+        private bool _refresh;
 
         public IEnumerator RenderCoroutine()
         {
+            _refresh = false;
             var flowMaps = new MapEnumerable(MapRankTypes.WATER_FLOW);
             var colMap = new MapEnumerable(MapRankTypes.COLOR_FIX);
             var layerMaps = new MapEnumerable(MapRankTypes.LAYER);
@@ -33,6 +35,15 @@ namespace AP.Canvas
             
             while (Application.isPlaying)
             {
+                if (_refresh)
+                {
+                    flowMaps = new MapEnumerable(MapRankTypes.WATER_FLOW);
+                    colMap = new MapEnumerable(MapRankTypes.COLOR_FIX);
+                    layerMaps = new MapEnumerable(MapRankTypes.LAYER);
+                    canvasMaps = new MapEnumerable(MapRankTypes.CANVAS);
+                    _refresh = false;
+                }
+
                 foreach (var flow in flowMaps)
                 {
                     flow.DoUpdate();
@@ -61,6 +72,11 @@ namespace AP.Canvas
                 
                 yield return null;
             }
+        }
+
+        public void Refresh()
+        {
+            _refresh = true;
         }
 
         private bool TimeOut()
