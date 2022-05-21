@@ -18,7 +18,22 @@ namespace AP
         [SerializeField]
         [Range(0, 1)]
         private float defaultWet;
+        [SerializeField]
+        [Range(0.0001f, 1)]
+        private float defaultBrushInterval;
+
+        [Space(10)] 
+        [SerializeField] 
+        [Range(0.0002f, 1.0f)]
+        private float defuseFactor;
+        [SerializeField]
+        [Range(0.00001f, 0.1f)]
+        private float evaporation;
         
+        
+        public float DefuseFactor { get; private set; }
+        public float Evaporation { get; private set; }
+
         public Color CurColor { get; private set; }
         public Color LasColor { get; private set; }
         
@@ -27,6 +42,8 @@ namespace AP
         
         public float WetMax { get; private set; }
         public float WetMin { get; private set; }
+        
+        public float BrushInterval { get; private set; }
     
         public void SetColor(APColorPickerUI picker)
         {
@@ -46,6 +63,17 @@ namespace AP
             WetMin = min;
         }
 
+        public void SetPaperWet(float def, float eva)
+        {
+            DefuseFactor = def;
+            Evaporation = eva;
+        }
+
+        public void SetBrushInterval(float interval)
+        {
+            BrushInterval = interval;
+        }
+
         #region 单例类
         public static APSamplerMgr I => _i;
         private static APSamplerMgr _i;
@@ -62,6 +90,9 @@ namespace AP
                 penSizeMin = penSizeMin <= penSizeMax ? penSizeMin : penSizeMax;
                 WetMax = defaultWet;
                 WetMin = defaultWet;
+                DefuseFactor = defuseFactor;
+                Evaporation = evaporation;
+                BrushInterval = defaultBrushInterval;
                 
                 DontDestroyOnLoad(gameObject);
             }

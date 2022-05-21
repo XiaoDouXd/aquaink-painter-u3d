@@ -35,10 +35,14 @@ namespace AP.Brush
         private Material _matWrite5678;
         private Material _matColor;
         
-        private static readonly int Rect1 = Shader.PropertyToID("_rect");
-        private static readonly int Color1 = Shader.PropertyToID("_color");
+        private static readonly int BrushColor = Shader.PropertyToID("_color");
         private static readonly int ColTable = Shader.PropertyToID("_ColTable");
         private static readonly int Wet = Shader.PropertyToID("_wet");
+        private static readonly int DoWriteTransRect = Shader.PropertyToID("_DoWriteTrans_rect");
+        private static readonly int DoWriteTransRotaWh = Shader.PropertyToID("_DoWriteTrans_rotaWH");
+        private static readonly int DoWriteTransAlphaAdd = Shader.PropertyToID("_DoWriteTrans_alphaAdd");
+        private static readonly int DoWriteTransBrush = Shader.PropertyToID("_DoWriteTrans_brush");
+        private static readonly int DoWriteTransSoft = Shader.PropertyToID("_DoWriteTrans_soft");
 
         public APBrush(APCanvas canvas)
         {
@@ -57,58 +61,98 @@ namespace AP.Brush
         {
             _color = color;
         }
-
         public void SetWet(float wet)
         {
             _wet = wet;
         }
-
         public void SetRadius(float radius)
         {
             _radius = radius;
         }
-        
-        public void DoWrite(Vector2 pos)
+        public void SetTex(Texture tex)
         {
-            DoWrite(_curLayer, pos);
+            _matColor.SetTexture(DoWriteTransBrush, tex);
+            _matWrite1234.SetTexture(DoWriteTransBrush, tex);
+            _matWrite5678.SetTexture(DoWriteTransBrush, tex);
+            _matWrite0.SetTexture(DoWriteTransBrush, tex);
         }
-        public void DoWrite(int layerId, Vector2 pos)
+
+        public void SetBrushInterval(float interval)
         {
-            var w = _canvas.Width;
-            var h = _canvas.Height;
-            var radiusW = 0.0f; 
-            var radiusH = 0.0f;
-            if (w > h)
+            _interval = interval;
+        }
+        
+        // 等间距笔画实现
+        private float _interval = 0.01f;
+        private bool _drawStart;
+        private Vector2 _posLast;
+        public void WriteDown(Vector2 pos)
+        {
+            if (!_drawStart)
             {
-                var aspect = (float)h / w;
-                radiusW = _radius * aspect;
-                radiusH = _radius;
+                _posLast = pos;
+                DoWrite(_curLayer, pos);
+                _drawStart = true;
             }
             else
             {
-                var aspect = (float)w / h;
-                radiusW = _radius;
-                radiusH = _radius * aspect;
+                var vec = pos - _posLast;
+                var dis = vec.magnitude;
+                // 有得画的
+                if (dis >= _interval)
+                {
+                    var times = Mathf.Floor(dis / _interval);
+                    var norVec = vec.normalized;
+                    for (var i = 0; i < times; i++)
+                    {
+                        _posLast += norVec * _interval;
+                        DoWrite(_curLayer, _posLast);
+                    }
+                }
             }
+        }
+
+        public void WriteUp(Vector2 pos)
+        {
+            if (!_drawStart) return;
             
-            Vector4 rect = new Vector4(pos.x - radiusW, pos.y - radiusH, pos.x + radiusW, pos.y + radiusH);
-            
-            _matColor.SetColor(Color1, _color);
+            WriteDown(pos);
+            _drawStart = false;
+        }
+
+        private void DoWrite(int layerId, Vector2 pos)
+        {
+            Vector4 rect = new Vector4(pos.x - _radius, pos.y - _radius, pos.x + _radius, pos.y + _radius);
+            Vector2 rota = new Vector2(Mathf.Cos(Time.time), Mathf.Sin(Time.time));
+            Vector2 wh = new Vector2(_canvas.Width, _canvas.Height);
+
+            // 绑定资源
+            _matWrite0.SetVector(DoWriteTransRect, rect);
+            _matWrite0.SetVector(DoWriteTransRotaWh, new Vector4(rota.x, rota.y, wh.x, wh.y));
+            _matWrite0.SetFloat(DoWriteTransAlphaAdd, -0);
             _matWrite0.SetFloat(Wet, _wet);
+            _matWrite0.SetFloat(DoWriteTransSoft, 0);
+            _matWrite1234.SetVector(DoWriteTransRect, rect);
+            _matWrite1234.SetVector(DoWriteTransRotaWh, new Vector4(rota.x, rota.y, wh.x, wh.y));
+            _matWrite1234.SetFloat(DoWriteTransAlphaAdd, -0);
             _matWrite1234.SetFloat(Wet, _wet);
+            _matWrite1234.SetFloat(DoWriteTransSoft, 0);
+            _matWrite5678.SetVector(DoWriteTransRect, rect);
+            _matWrite5678.SetVector(DoWriteTransRotaWh, new Vector4(rota.x, rota.y, wh.x, wh.y));
+            _matWrite5678.SetFloat(DoWriteTransAlphaAdd, -0);
             _matWrite5678.SetFloat(Wet, _wet);
+            _matWrite5678.SetFloat(DoWriteTransSoft, 0);
+            _matColor.SetVector(DoWriteTransRect, rect);
+            _matColor.SetVector(DoWriteTransRotaWh, new Vector4(rota.x, rota.y, wh.x, wh.y));
+            _matColor.SetFloat(DoWriteTransAlphaAdd, -0);
+            _matColor.SetColor(BrushColor, _color);
+            _matColor.SetFloat(DoWriteTransSoft, 0);
             
             _canvas[layerId]?.DoWrite((info) =>
             {
                 var data = info as APLayerInfo;
                 if (data == null) return;
-                
-                // 绑定资源
-                _matWrite0.SetVector(Rect1, rect);
-                _matWrite1234.SetVector(Rect1, rect);
-                _matWrite5678.SetVector(Rect1, rect);
-                _matColor.SetVector(Rect1, rect);
-                
+
                 // 写入
                 Graphics.Blit(data.f0, data.fTemp, _matWrite0);
                 Graphics.Blit(data.fTemp, data.f0);

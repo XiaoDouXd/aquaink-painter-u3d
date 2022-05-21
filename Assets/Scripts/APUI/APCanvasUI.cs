@@ -1,3 +1,4 @@
+using System;
 using AP.Brush;
 using AP.Canvas;
 using UnityEngine;
@@ -14,7 +15,7 @@ namespace AP.UI
         public Texture paper;
     }
 
-    public class APCanvasUI : MonoBehaviour, IDragHandler, IPointerDownHandler, IScrollHandler
+    public class APCanvasUI : MonoBehaviour, IDragHandler, IPointerDownHandler, IPointerUpHandler, IScrollHandler, IPointerExitHandler
     {
         public bool Inited => _inited;
         
@@ -25,6 +26,7 @@ namespace AP.UI
         private double _proportion;
         private bool _moving;
         private bool _inited;
+        private APLayerPersistentInfo _clearSave;
 
         public void Init(APCanvasInfo data)
         {
@@ -55,6 +57,16 @@ namespace AP.UI
             }
             
             _inited = true;
+
+            _clearSave = _canvas[_canvas.FirstLayer].NewEmptyInfo() as APLayerPersistentInfo;
+            APPersistentMgr.I.DoSave(new APPersistentOperation()
+            {
+                canvas = _canvas,
+                layer = _canvas[_canvas.FirstLayer],
+                op = APPersistentOp.DRAW
+            });
+            
+            _brush?.SetTex(APInitMgr.I.brushTex1);
         }
 
         //--------------------------------------------------------- UI刷新
@@ -88,36 +100,86 @@ namespace AP.UI
                     .setEase(LeanTweenType.easeInOutSine);
             }
         }
+
+        private bool _pressStart = false;
         private void Update()
         {
             if (!_inited) return;
             
             _brush?.SetColor(APSamplerMgr.I.CurColor);
+            _brush?.SetBrushInterval(APSamplerMgr.I.BrushInterval);
+            
             if (Pen.current.pressure.IsPressed())
             {
-                _brush?.SetRadius(Mathf.Lerp(
-                    APSamplerMgr.I.PenSizeMin,
-                    APSamplerMgr.I.PenSizeMax,
-                    Pen.current.pressure.ReadValue()));
-                _brush?.SetWet(Mathf.Lerp(
-                    APSamplerMgr.I.WetMin,
-                    APSamplerMgr.I.WetMax,
-                    Pen.current.pressure.ReadValue()
+                if (_pressStart)
+                {
+                    _brush?.SetRadius(Mathf.Lerp(
+                        APSamplerMgr.I.PenSizeMin,
+                        APSamplerMgr.I.PenSizeMax,
+                        Pen.current.pressure.ReadValue()));
+                    _brush?.SetWet(Mathf.Lerp(
+                        APSamplerMgr.I.WetMin,
+                        APSamplerMgr.I.WetMax,
+                        Pen.current.pressure.ReadValue()
                     ));
+                }
+                else
+                {
+                    _pressStart = true;
+                }
+
             }
             else
             {
                 _brush?.SetRadius(APSamplerMgr.I.PenSizeMax);
                 _brush?.SetWet(APSamplerMgr.I.WetMax);
             }
-            
+
+            if (!Pen.current.pressure.IsPressed())
+            {
+                _pressStart = false;
+            }
 
             if (Keyboard.current.spaceKey.wasPressedThisFrame)
             {
                 LerpResetSize();
             }
+
+#if !UNITY_EDITOR
+            if (Keyboard.current.ctrlKey.isPressed &&
+                Keyboard.current.zKey.wasPressedThisFrame)
+#else
+            if (Keyboard.current.ctrlKey.isPressed &&
+                Keyboard.current.spaceKey.wasPressedThisFrame)
+#endif
+            {
+                APPersistentMgr.I.GoBack(_canvas);
+            }
+#if !UNITY_EDITOR
+            if (Keyboard.current.ctrlKey.isPressed &&
+                Keyboard.current.zKey.wasPressedThisFrame &&
+                Keyboard.current.shiftKey.isPressed)
+#else
+            if (Keyboard.current.ctrlKey.isPressed &&
+                Keyboard.current.spaceKey.wasPressedThisFrame
+                && Keyboard.current.altKey.isPressed)
+#endif
+            {
+                APPersistentMgr.I.GoForward(_canvas);
+            }
+            
+            if (Keyboard.current.ctrlKey.isPressed &&
+                Keyboard.current.spaceKey.wasPressedThisFrame
+                && Keyboard.current.shiftKey.isPressed)
+            {
+                _canvas[_canvas.FirstLayer].DoLoad(_clearSave);
+            }
         }
-        
+        private void FixedUpdate()
+        {
+            _canvas.UpdateRenderData();
+        }
+
         //--------------------------------------------------------- 画布交互
         public void OnDrag(PointerEventData eventData)
         {
@@ -141,16 +203,30 @@ namespace AP.UI
             if (_moving) return;
 
             if (eventData.button == PointerEventData.InputButton.Left)
+            {
                 Draw(eventData.position);
+            }
+                
         }
-        private void Draw(Vector2 pos)
+        private void Draw(Vector2 pos, bool up = false)
         {
             if (!_inited) return;
             if (_moving) return;
             var posC = APBrush.Window2Canvas(_background, pos);
             if (posC.isInside)
             {
-                _brush.DoWrite(posC.pos);
+                if (up)
+                {
+                    _brush.WriteUp(posC.pos);
+                }
+                else
+                {
+                    _brush.WriteDown(posC.pos);
+                }
+            }
+            else
+            {
+                _brush.WriteUp(posC.pos);
             }
         }
         public void OnScroll(PointerEventData eventData)
@@ -158,6 +234,20 @@ namespace AP.UI
             if (!_inited) return;
             if (_moving) return;
             _background.localScale += new Vector3(0.1f * eventData.scrollDelta.y, 0.1f * eventData.scrollDelta.y, 0);
+        }
+        public void OnPointerUp(PointerEventData eventData)
+        {
+            Draw(eventData.position, true);
+            APPersistentMgr.I.DoSave(new APPersistentOperation()
+            {
+                canvas = _canvas,
+                layer = _canvas[_canvas.FirstLayer],
+                op = APPersistentOp.DRAW
+            });
+        }
+        public void OnPointerExit(PointerEventData eventData)
+        {
+
         }
     }
 }

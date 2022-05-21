@@ -1,11 +1,14 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 namespace AP.UI
 {
-    public class APLeftPanelContentItemUI : MonoBehaviour
+    public class APLeftPanelContentItemUI : MonoBehaviour, IScrollHandler, IDragHandler
     {
         #region Inspector
+        public float canvasHeight = 1080;
         public bool dragEnable;
         public float hideOffset;
         [Tooltip("组件间隔")]
@@ -20,10 +23,12 @@ namespace AP.UI
         #endregion
         
         public float Width => _width;
+        public float Height => _widgetItemHeightSum;
         
         private RectTransform _rt;
         private bool _isActive;
         private float _width;
+        private float _widgetItemHeightSum;
         private List<APPanelWidgetUI> _widgets = new List<APPanelWidgetUI>();
         private APLeftPanelContentUI _content;
         private APLeftPanelTabItemUI _tab;
@@ -92,12 +97,15 @@ namespace AP.UI
             }
             
             // 设置游戏物体
+            _widgetItemHeightSum = 0;
             var height = 0.0f;
             foreach (var widget in _widgets)
             {
                 widget.SetContent(this, new Vector2(0, height));
                 height -= widget.Height + interval;
             }
+            _widgetItemHeightSum = -height;
+            _rt.sizeDelta = new Vector2(_rt.sizeDelta.x, _widgetItemHeightSum);
             
             SetHideImmediately();
         }
@@ -126,7 +134,7 @@ namespace AP.UI
                     _widgets[i].SetShow(0.1f, delay, OnShowComplete);
                 else
                     _widgets[i].SetShow(0.1f, delay);
-                delay += 0.01f;
+                delay += 0.05f;
             }
             
             _rt.anchoredPosition = new Vector2(0, _rt.anchoredPosition.y);
@@ -139,6 +147,52 @@ namespace AP.UI
                 widget.OnHideComplete();
             }
             gameObject.SetActive(false);
+        }
+
+        public void OnScroll(PointerEventData eventData)
+        {
+            if (Height - APUIMgr.I.GetCanvasScaleHeight() < 50 ||
+                (_rt.anchoredPosition.y >= Height - APUIMgr.I.GetCanvasScaleHeight() + 50 && eventData.scrollDelta.y > 0) ||
+                (_rt.anchoredPosition.y < 0 && eventData.scrollDelta.y < 0)
+               )
+                return;
+            
+            if (_rt.anchoredPosition.y < Height - APUIMgr.I.GetCanvasScaleHeight() + 50 && _rt.anchoredPosition.y >= 0)
+            {
+                var dPos = new Vector2(0, eventData.scrollDelta.y);
+                _rt.anchoredPosition += dPos;
+            }
+            else if (_rt.anchoredPosition.y < 0)
+            {
+                _rt.anchoredPosition = new Vector2(_rt.anchoredPosition.x, 0);
+            }
+            else if (_rt.anchoredPosition.y >= Height - APUIMgr.I.GetCanvasScaleHeight() + 50)
+            {
+                _rt.anchoredPosition = new Vector2(_rt.anchoredPosition.x, Height - APUIMgr.I.GetCanvasScaleHeight() + 49.5f);
+            }
+        }
+
+        public void OnDrag(PointerEventData eventData)
+        {
+            if (Height - APUIMgr.I.GetCanvasScaleHeight() < 50 ||
+                (_rt.anchoredPosition.y >= Height - APUIMgr.I.GetCanvasScaleHeight() + 50 && eventData.delta.y > 0) ||
+                (_rt.anchoredPosition.y < 0 && eventData.delta.y < 0)
+                )
+                return;
+            
+            if (_rt.anchoredPosition.y < Height - APUIMgr.I.GetCanvasScaleHeight() + 50 && _rt.anchoredPosition.y >= 0)
+            {
+                var dPos = new Vector2(0, eventData.delta.y);
+                _rt.anchoredPosition += dPos;
+            }
+            else if (_rt.anchoredPosition.y < 0)
+            {
+                _rt.anchoredPosition = new Vector2(_rt.anchoredPosition.x, 0);
+            }
+            else if (_rt.anchoredPosition.y >= Height - APUIMgr.I.GetCanvasScaleHeight() + 50)
+            {
+                _rt.anchoredPosition = new Vector2(_rt.anchoredPosition.x, Height - APUIMgr.I.GetCanvasScaleHeight() + 49.5f);
+            }
         }
     }
 }

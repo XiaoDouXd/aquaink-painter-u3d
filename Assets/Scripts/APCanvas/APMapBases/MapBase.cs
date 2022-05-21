@@ -3,7 +3,15 @@ using UnityEngine;
 
 namespace AP.Canvas
 {
-    public class MapInfoBase { }
+    public class MapInfoBase
+    {
+        public MapBase map;
+
+        public virtual void DoRelease()
+        {
+            map = null;
+        }
+    }
     
     /// <summary>
     /// 贴图集类
@@ -24,6 +32,7 @@ namespace AP.Canvas
         /// 是否可用
         /// </summary>
         public bool Enable { get; set; } = true;
+        public bool Released => _isRelease;
         /// <summary>
         /// 贴图输出
         /// </summary>
@@ -43,18 +52,14 @@ namespace AP.Canvas
         /// </summary>
         public virtual void DoUpdate(Material material, params Texture[] texs) { }
         /// <summary>
-        /// 重置贴图
-        /// </summary>
-        public virtual void DoRecreate(int width, int height, bool clear = true)
-        {
-            _size = ((uint)width, (uint)height);
-        }
-        /// <summary>
         /// 释放贴图集
         /// </summary>
         public virtual void DoRelease()
         {
+            if (Released) return;
+            
             _mapBaseList.Remove(this);
+            _isRelease = true;
         }
         /// <summary>
         /// 写入贴图
@@ -63,6 +68,27 @@ namespace AP.Canvas
         public virtual void DoWrite(Action<MapInfoBase> act)
         {
             act?.Invoke(Info);
+        }
+        /// <summary>
+        /// 载入贴图
+        /// </summary>
+        /// <param name="info"></param>
+        public virtual void DoLoad(MapInfoBase info) { }
+        /// <summary>
+        /// 保存贴图
+        /// </summary>
+        /// <returns></returns>
+        public virtual MapInfoBase DoSave(MapInfoBase container)
+        {
+            return container;
+        }
+        /// <summary>
+        /// 制作贴图容器
+        /// </summary>
+        /// <returns></returns>
+        public virtual MapInfoBase NewEmptyInfo()
+        {
+            return new MapInfoBase();
         }
 
         // -----------------------------------------------------
@@ -75,6 +101,7 @@ namespace AP.Canvas
         protected MapBase(uint width, uint height, MapRankTypes typ)
         {
             _size = (width, height);
+            _isRelease = false;
             CutInLine((uint)typ);
         }
 
@@ -83,5 +110,6 @@ namespace AP.Canvas
         /// 大小
         /// </summary>
         private (uint, uint) _size;
+        private bool _isRelease;
     }
 }

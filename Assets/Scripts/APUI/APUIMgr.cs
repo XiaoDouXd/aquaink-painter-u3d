@@ -5,6 +5,7 @@ public class APUIMgr : MonoBehaviour
 {
     public bool EnableUIEvent { get; set; }
     public GameObject UIRoot => gameObject;
+    public float canvasScalerWid;
 
     private void Start()
     {
@@ -60,6 +61,11 @@ public class APUIMgr : MonoBehaviour
     public float SignedAngle(Vector2 from, Vector2 to)
     {
         return Vector2.SignedAngle(from, to) + 180;
+    }
+
+    public float GetCanvasScaleHeight()
+    {
+        return canvasScalerWid / APInitMgr.I.WindowAspect;
     }
     #endregion
 }

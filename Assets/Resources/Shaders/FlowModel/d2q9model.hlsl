@@ -11,7 +11,7 @@
 #define DX 1                                                            // 距离间隔
 #define DT 1                                                            // 时间间隔
 #define RHO0 1                                                          // 液体平均密度(水的密度是1)
-#define E 0.0002                                                        // 蒸发率
+float E ;//0.0002                                                        // 蒸发率
 #define EB 0.3                                                          // 边界蒸发率影响因子
 
 static const float weight1234 = 1.0 / 9.0;                              // 各向权值
@@ -39,7 +39,7 @@ static const float avgRho = 1.0 / RHO0;                                 // 平�
 
 #define XI 0.005
 #define MU 0.005
-#define ETA 0.005
+float ETA; //0.005
 
 
 // 该点保存的所有分量信息结构体

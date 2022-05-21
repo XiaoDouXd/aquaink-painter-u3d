@@ -68,7 +68,16 @@ namespace AP.Canvas
         public override Texture Tex => _blurTex;
         public override MapInfoBase Info => null;
         public RawImage Surface { get; private set; }
-        public APLayer this[int layerId] => _layers[layerId];
+
+        public APLayer this[int layerId]
+        {
+            get
+            {
+                if (Released)
+                    return null;
+                return _layers[layerId];
+            }
+        } 
         public int FirstLayer => _layerRank.First.Value;
 
         private static readonly Shader ClearShader = Shader.Find("Canvas/Clear0000");
@@ -104,8 +113,21 @@ namespace AP.Canvas
                 Add();
         }
 
+        public void UpdateRenderData()
+        {
+            foreach (var la in _layers)
+            {
+                la.Value.UpdateRenderData();
+            }
+        }
+
         public void ReRank(LinkedListNode<int> node, int rank)
         {
+            if (Released)
+            {
+                throw new ApplicationException("APCanvas.ReRank: 错误！死去的Canvas类开始攻击我！");
+            }
+            
             _layerRank.Remove(node);
             if (rank >= _layerRank.Count)
             {
@@ -134,12 +156,23 @@ namespace AP.Canvas
         }
         public void Remove(int id)
         {
-            if (_layers.Count == 1)  return;
+            if (Released)
+            {
+                throw new ApplicationException("APCanvas.Remove: 错误！死去的Canvas类开始攻击我！");
+            }
             
+            if (_layers.Count == 1)  return;
+
+            _layers[id]?.DoRelease();
             _layers.Remove(id);
         }
         public void Add()
         {
+            if (Released)
+            {
+                throw new ApplicationException("APCanvas.Add: 错误！死去的Canvas类开始攻击我！");
+            }
+            
             var layer = new APLayer(Width, Height, APInitMgr.I.defaultPaper1, NewIdx());
             layer.Name = $"新建图层{_newLayerCount}";
 
@@ -148,6 +181,11 @@ namespace AP.Canvas
         }
         public void Add(Texture paper)
         {
+            if (Released)
+            {
+                throw new ApplicationException("APCanvas.Add: 错误！死去的Canvas类开始攻击我！");
+            }
+            
             var layer = new APLayer(Width, Height, paper, NewIdx());
             layer.Name = $"新建图层{_newLayerCount}";
             
@@ -156,6 +194,11 @@ namespace AP.Canvas
         }
         public override void DoUpdate()
         {
+            if (Released)
+            {
+                throw new ApplicationException("APCanvas.DoUpdate: 错误！死去的Canvas类开始攻击我！");
+            }
+            
             base.DoUpdate();
 
             Graphics.Blit(null, _blurTex, _clear);
@@ -168,9 +211,22 @@ namespace AP.Canvas
                 Graphics.Blit(_rtTemp, _blurTex);
             }
         }
+        public override void DoRelease()
+        {
+            if (Released) return;
+            base.DoRelease();
+
+            foreach (var l in _layers)
+            {
+                l.Value.DoRelease();
+            }
+            _layers.Clear();
+            _layerRank.Clear();
+            APPersistentMgr.I.DoDelete(this);
+        }
         public IEnumerator<APLayer> GetEnumerator()
         {
-            if (_layerRank == null)
+            if (_layerRank == null || Released)
                 yield break;
 
             foreach (var layer in _layerRank)
@@ -184,11 +240,12 @@ namespace AP.Canvas
         }
         private int NewIdx()
         {
+            if (Released) return -1;
+            
             if (_layers.Count == MaxLayerCount)
             {
                 throw new ApplicationException("APCanvas.NewIdx: 错误！创建了过多的图层！");
             }
-            
             while (_layers.ContainsKey(_curIdxCount))
             {
                 if (_curIdxCount == int.MaxValue)
@@ -197,7 +254,6 @@ namespace AP.Canvas
                 }
                 _curIdxCount++;
             }
-
             return _curIdxCount;
         }
     }

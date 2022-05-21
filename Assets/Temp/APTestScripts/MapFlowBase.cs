@@ -20,10 +20,8 @@ namespace AP.Canvas
         /// <param name="width"> 宽 </param>
         /// <param name="height"> 高 </param>
         /// <param name="clear"> 是否清空 </param>
-        public override void DoRecreate(int width, int height, bool clear = true)
+        public void DoRecreate(int width, int height, bool clear = true)
         {
-            base.DoRecreate(width, height, clear);
-        
             // 不复制
             if (clear)
             {

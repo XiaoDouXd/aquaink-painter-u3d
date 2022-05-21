@@ -37,10 +37,8 @@ namespace AP.Canvas
             _d2Q9MatVelocity.SetTexture(LastTex1234, _rtF1234);
         }
 
-        public override void DoRecreate(int width, int height, bool clear = true)
+        public void DoRecreate(int width, int height, bool clear = true)
         {
-            base.DoRecreate(width, height, clear);
-            
             // 初始化贴图
             _rtF1234 = new RenderTexture(width, height, 0, GraphicsFormat.R16G16B16A16_SFloat) { filterMode = FilterMode.Point };
             _rtTemp = new RenderTexture(width, height, 0, GraphicsFormat.R16G16B16A16_SFloat) { filterMode = FilterMode.Point };

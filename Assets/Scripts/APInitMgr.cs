@@ -7,6 +7,8 @@ public class APInitMgr : MonoBehaviour
     // 这里用于挂在初始化需要的资源
     [Tooltip("用于混色模型的颜色-颜料映射表")]
     public Texture2D colorTable;
+    
+    [Space(20)]
     [Tooltip("默认纸张纹理")]
     public Texture2D defaultPaper1;
     [Tooltip("默认纸张纹理")]
@@ -17,8 +19,14 @@ public class APInitMgr : MonoBehaviour
     public Texture2D defaultPaper4;
     [Tooltip("默认纸张纹理")]
     public Texture2D defaultPaper5;
+    
+    [Space(20)]
     [Tooltip("UI根节点")]
     public RectTransform surfaceRoot;
+
+    [Space(20)]
+    [Tooltip("笔刷贴图1")]
+    public Texture2D brushTex1;
     
     // ---------------------------------------------------------------------------
     // 渲染初始化
@@ -50,10 +58,10 @@ public class APInitMgr : MonoBehaviour
     #region 工具函数
     public Vector2 WindowCenter => new Vector2(Screen.width/2.0f, Screen.height/2.0f);
     public Vector2 WindowSize => new Vector2(Screen.width, Screen.height);
-
     public void RenderReset()
     {
         MapRenderer.I.Refresh();
     }
+    public float WindowAspect => (float)Screen.width / Screen.height;
     #endregion
 }

@@ -157,10 +157,10 @@ namespace AP
                 var node = ev.Value.First;
                 while (node != null)
                 {
-                    if (node.Value.destroyed)
-                        ev.Value.Remove(node);
-
+                    var tmp = node;
                     node = node.Next;
+                    if (tmp.Value.destroyed)
+                        ev.Value.Remove(tmp);
                 }
 
                 if (ev.Value.Count == 0)
@@ -179,10 +179,10 @@ namespace AP
                 var node = ev.Value.First;
                 while (node != null)
                 {
-                    if (node.Value.destroyed)
-                        ev.Value.Remove(node);
-
+                    var tmp = node;
                     node = node.Next;
+                    if (tmp.Value.destroyed)
+                        ev.Value.Remove(tmp);
                 }
 
                 if (ev.Value.Count == 0)
