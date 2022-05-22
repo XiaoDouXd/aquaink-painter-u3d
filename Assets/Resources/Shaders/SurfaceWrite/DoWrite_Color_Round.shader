@@ -15,7 +15,7 @@
             #pragma fragment frag
 
             #include "UnityCG.cginc"
-            #include "DoWrite_SamplerTrans.cginc"
+            #include "PreWrite_Input.cginc"
             #include "../ColmixModel/colmix.hlsl"
 
             struct v2f
@@ -35,7 +35,6 @@
             // _MainTex 为需要写入的贴图
             sampler2D _MainTex;
             
-            float4 _color;
             Texture2D _ColTable;
             SamplerState sampler_ColTable;
 
@@ -44,11 +43,10 @@
                 float4 col = tex2D(_MainTex, i.uv);
                 
                 // 画圆
-                float dis = getColorAlpha(i.uv);
-                _color.a *= dis;
+                float4 colPre = preCol(i.uv);
                 
-                float3 colNew = ap_mixbox_kmerp(col.xyz, _color.xyz, _color.a, _ColTable, sampler_ColTable);
-                float a = col.a + _color.a;
+                float3 colNew = ap_mixbox_kmerp(col.xyz, colPre.xyz, colPre.a, _ColTable, sampler_ColTable);
+                float a = col.a + colPre.a;
                 
                 return float4(colNew, a);
             }

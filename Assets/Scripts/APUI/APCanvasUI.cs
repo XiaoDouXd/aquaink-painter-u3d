@@ -1,4 +1,3 @@
-using System;
 using AP.Brush;
 using AP.Canvas;
 using UnityEngine;
@@ -15,12 +14,12 @@ namespace AP.UI
         public Texture paper;
     }
 
-    public class APCanvasUI : MonoBehaviour, IDragHandler, IPointerDownHandler, IPointerUpHandler, IScrollHandler, IPointerExitHandler
+    public class APCanvasUI : MonoBehaviour, IDragHandler, IPointerDownHandler, IPointerUpHandler, IScrollHandler
     {
         public bool Inited => _inited;
         
         private APCanvas _canvas;
-        private APBrush _brush;
+        private APBrushRound _brush;
         private RectTransform _background;
         private RawImage _surface;
         private double _proportion;
@@ -34,7 +33,7 @@ namespace AP.UI
             _background = GetComponent<RectTransform>();
 
             _canvas = new APCanvas(data.width, data.height, _surface, data.paper);
-            _brush = new APBrush(_canvas);
+            _brush = new APBrushRound(_canvas);
             
             // 根据窗口大小设置初始大小
             _proportion = (double)_canvas.Width / _canvas.Height;
@@ -67,8 +66,8 @@ namespace AP.UI
             });
             
             _brush?.SetTex(APInitMgr.I.brushTex1);
+            _brush?.SetRadius(APSamplerMgr.I.PenSizeMin);
         }
-
         //--------------------------------------------------------- UI刷新
         private void LerpResetSize()
         {
@@ -100,8 +99,6 @@ namespace AP.UI
                     .setEase(LeanTweenType.easeInOutSine);
             }
         }
-
-        private bool _pressStart = false;
         private void Update()
         {
             if (!_inited) return;
@@ -109,11 +106,9 @@ namespace AP.UI
             _brush?.SetColor(APSamplerMgr.I.CurColor);
             _brush?.SetBrushInterval(APSamplerMgr.I.BrushInterval);
             
-            if (Pen.current.pressure.IsPressed())
+            if (Pen.current.pressure.IsActuated())
             {
-                if (_pressStart)
-                {
-                    _brush?.SetRadius(Mathf.Lerp(
+                _brush?.SetRadius(Mathf.Lerp(
                         APSamplerMgr.I.PenSizeMin,
                         APSamplerMgr.I.PenSizeMax,
                         Pen.current.pressure.ReadValue()));
@@ -122,22 +117,17 @@ namespace AP.UI
                         APSamplerMgr.I.WetMax,
                         Pen.current.pressure.ReadValue()
                     ));
-                }
-                else
-                {
-                    _pressStart = true;
-                }
-
+                _brush?.SetSoftAndAlphaAdd(APSamplerMgr.I.Soft, 
+                    Mathf.Lerp(
+                        APSamplerMgr.I.AlphaAddMin,
+                        APSamplerMgr.I.AlphaAdd,
+                        Pen.current.pressure.ReadValue()));
             }
-            else
+            else if (Mouse.current.leftButton.wasPressedThisFrame)
             {
                 _brush?.SetRadius(APSamplerMgr.I.PenSizeMax);
                 _brush?.SetWet(APSamplerMgr.I.WetMax);
-            }
-
-            if (!Pen.current.pressure.IsPressed())
-            {
-                _pressStart = false;
+                _brush?.SetSoftAndAlphaAdd(APSamplerMgr.I.Soft, APSamplerMgr.I.AlphaAddMin);
             }
 
             if (Keyboard.current.spaceKey.wasPressedThisFrame)
@@ -212,21 +202,21 @@ namespace AP.UI
         {
             if (!_inited) return;
             if (_moving) return;
-            var posC = APBrush.Window2Canvas(_background, pos);
+            var posC = APBrushMgr.Window2Canvas(_background, pos);
             if (posC.isInside)
             {
                 if (up)
                 {
-                    _brush.WriteUp(posC.pos);
+                    _brush.DoWriteUp(posC.pos);
                 }
                 else
                 {
-                    _brush.WriteDown(posC.pos);
+                    _brush.DoWriteDown(posC.pos);
                 }
             }
             else
             {
-                _brush.WriteUp(posC.pos);
+                _brush.DoWriteUp(posC.pos);
             }
         }
         public void OnScroll(PointerEventData eventData)
@@ -237,6 +227,7 @@ namespace AP.UI
         }
         public void OnPointerUp(PointerEventData eventData)
         {
+            _brush?.SetRadius(APSamplerMgr.I.PenSizeMin);
             Draw(eventData.position, true);
             APPersistentMgr.I.DoSave(new APPersistentOperation()
             {
@@ -244,10 +235,6 @@ namespace AP.UI
                 layer = _canvas[_canvas.FirstLayer],
                 op = APPersistentOp.DRAW
             });
-        }
-        public void OnPointerExit(PointerEventData eventData)
-        {
-
         }
     }
 }

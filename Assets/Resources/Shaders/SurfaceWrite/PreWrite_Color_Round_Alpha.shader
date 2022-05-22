@@ -1,4 +1,4 @@
-﻿Shader "DoWrite/WaterF1234_Round"
+﻿Shader "AP/PreWrite/Color_Round_Alpha"
 {
     Properties
     {
@@ -15,7 +15,7 @@
             #pragma fragment frag
 
             #include "UnityCG.cginc"
-            #include  "PreWrite_Input.cginc"
+            #include "DoWrite_SamplerTrans.cginc"
 
             struct v2f
             {
@@ -31,23 +31,11 @@
                 return o;
             }
 
-            // _MainTex 为需要写入的贴图
             sampler2D _MainTex;
-            // 湿度
-            float _wet;
 
-            float4 frag (v2f i) : SV_Target
+            float frag (v2f i) : SV_Target
             {
-                float4 col = tex2D(_MainTex, i.uv);
-                
-                // 画圆
-                float dis = preAlpha(i.uv);
-                dis *= _wet;
-                dis = saturate(dis);
-                
-                float4 colNew = dis * float4(1.0/9, 1.0/9, 1.0/9, 1.0/9) + (1 - dis) * col;
-                
-                return colNew;
+                return max(tex2D(_MainTex, i.uv), getColorAlpha(i.uv));
             }
             ENDHLSL
         }

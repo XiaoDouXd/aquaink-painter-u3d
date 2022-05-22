@@ -5,6 +5,7 @@
     /// </summary>
     public enum MapRankTypes : uint
     {
+        NONE = 0,
         WATER_FLOW = 100,
         COLOR_FIX = 200,
         LAYER = 300,

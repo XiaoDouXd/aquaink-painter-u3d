@@ -1,5 +1,11 @@
+using System;
+using System.Numerics;
 using AP.Canvas;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
+using UnityEngine.InputSystem.Processors;
+using UnityEngine.UI;
+using Vector2 = UnityEngine.Vector2;
 
 namespace AP.Brush
 {
@@ -15,155 +21,6 @@ namespace AP.Brush
             }
         }
         private static APBrushMgr _i;
-    }
-
-    public class APBrush
-    {
-        private APCanvas _canvas;
-        private int _curLayer;
-        private float _radius = 0.08f;
-        private float _wet;
-        private Color _color;
-
-        private static readonly Shader WriteF0 = Shader.Find("DoWrite/WaterF0_Round");
-        private static readonly Shader WriteF1234 = Shader.Find("DoWrite/WaterF1234_Round");
-        private static readonly Shader WriteF5678 = Shader.Find("DoWrite/WaterF5678_Round");
-        private static readonly Shader ColorShader = Shader.Find("DoWrite/Color_Round");
-
-        private Material _matWrite0;
-        private Material _matWrite1234;
-        private Material _matWrite5678;
-        private Material _matColor;
-        
-        private static readonly int BrushColor = Shader.PropertyToID("_color");
-        private static readonly int ColTable = Shader.PropertyToID("_ColTable");
-        private static readonly int Wet = Shader.PropertyToID("_wet");
-        private static readonly int DoWriteTransRect = Shader.PropertyToID("_DoWriteTrans_rect");
-        private static readonly int DoWriteTransRotaWh = Shader.PropertyToID("_DoWriteTrans_rotaWH");
-        private static readonly int DoWriteTransAlphaAdd = Shader.PropertyToID("_DoWriteTrans_alphaAdd");
-        private static readonly int DoWriteTransBrush = Shader.PropertyToID("_DoWriteTrans_brush");
-        private static readonly int DoWriteTransSoft = Shader.PropertyToID("_DoWriteTrans_soft");
-
-        public APBrush(APCanvas canvas)
-        {
-            _canvas = canvas;
-            _curLayer = _canvas.FirstLayer;
-
-            _matWrite0 = new Material(WriteF0) { hideFlags = HideFlags.DontSave };
-            _matWrite1234 = new Material(WriteF1234) { hideFlags = HideFlags.DontSave };
-            _matWrite5678 = new Material(WriteF5678) { hideFlags = HideFlags.DontSave };
-            _matColor = new Material(ColorShader) { hideFlags = HideFlags.DontSave };
-            
-            _matColor.SetTexture(ColTable, APInitMgr.I.colorTable);
-        }
-
-        public void SetColor(Color color)
-        {
-            _color = color;
-        }
-        public void SetWet(float wet)
-        {
-            _wet = wet;
-        }
-        public void SetRadius(float radius)
-        {
-            _radius = radius;
-        }
-        public void SetTex(Texture tex)
-        {
-            _matColor.SetTexture(DoWriteTransBrush, tex);
-            _matWrite1234.SetTexture(DoWriteTransBrush, tex);
-            _matWrite5678.SetTexture(DoWriteTransBrush, tex);
-            _matWrite0.SetTexture(DoWriteTransBrush, tex);
-        }
-
-        public void SetBrushInterval(float interval)
-        {
-            _interval = interval;
-        }
-        
-        // 等间距笔画实现
-        private float _interval = 0.01f;
-        private bool _drawStart;
-        private Vector2 _posLast;
-        public void WriteDown(Vector2 pos)
-        {
-            if (!_drawStart)
-            {
-                _posLast = pos;
-                DoWrite(_curLayer, pos);
-                _drawStart = true;
-            }
-            else
-            {
-                var vec = pos - _posLast;
-                var dis = vec.magnitude;
-                // 有得画的
-                if (dis >= _interval)
-                {
-                    var times = Mathf.Floor(dis / _interval);
-                    var norVec = vec.normalized;
-                    for (var i = 0; i < times; i++)
-                    {
-                        _posLast += norVec * _interval;
-                        DoWrite(_curLayer, _posLast);
-                    }
-                }
-            }
-        }
-
-        public void WriteUp(Vector2 pos)
-        {
-            if (!_drawStart) return;
-            
-            WriteDown(pos);
-            _drawStart = false;
-        }
-
-        private void DoWrite(int layerId, Vector2 pos)
-        {
-            Vector4 rect = new Vector4(pos.x - _radius, pos.y - _radius, pos.x + _radius, pos.y + _radius);
-            Vector2 rota = new Vector2(Mathf.Cos(Time.time), Mathf.Sin(Time.time));
-            Vector2 wh = new Vector2(_canvas.Width, _canvas.Height);
-
-            // 绑定资源
-            _matWrite0.SetVector(DoWriteTransRect, rect);
-            _matWrite0.SetVector(DoWriteTransRotaWh, new Vector4(rota.x, rota.y, wh.x, wh.y));
-            _matWrite0.SetFloat(DoWriteTransAlphaAdd, -0);
-            _matWrite0.SetFloat(Wet, _wet);
-            _matWrite0.SetFloat(DoWriteTransSoft, 0);
-            _matWrite1234.SetVector(DoWriteTransRect, rect);
-            _matWrite1234.SetVector(DoWriteTransRotaWh, new Vector4(rota.x, rota.y, wh.x, wh.y));
-            _matWrite1234.SetFloat(DoWriteTransAlphaAdd, -0);
-            _matWrite1234.SetFloat(Wet, _wet);
-            _matWrite1234.SetFloat(DoWriteTransSoft, 0);
-            _matWrite5678.SetVector(DoWriteTransRect, rect);
-            _matWrite5678.SetVector(DoWriteTransRotaWh, new Vector4(rota.x, rota.y, wh.x, wh.y));
-            _matWrite5678.SetFloat(DoWriteTransAlphaAdd, -0);
-            _matWrite5678.SetFloat(Wet, _wet);
-            _matWrite5678.SetFloat(DoWriteTransSoft, 0);
-            _matColor.SetVector(DoWriteTransRect, rect);
-            _matColor.SetVector(DoWriteTransRotaWh, new Vector4(rota.x, rota.y, wh.x, wh.y));
-            _matColor.SetFloat(DoWriteTransAlphaAdd, -0);
-            _matColor.SetColor(BrushColor, _color);
-            _matColor.SetFloat(DoWriteTransSoft, 0);
-            
-            _canvas[layerId]?.DoWrite((info) =>
-            {
-                var data = info as APLayerInfo;
-                if (data == null) return;
-
-                // 写入
-                Graphics.Blit(data.f0, data.fTemp, _matWrite0);
-                Graphics.Blit(data.fTemp, data.f0);
-                Graphics.Blit(data.f1234, data.fTemp, _matWrite1234);
-                Graphics.Blit(data.fTemp, data.f1234);
-                Graphics.Blit(data.f5678, data.fTemp, _matWrite5678);
-                Graphics.Blit(data.fTemp, data.f5678);
-                Graphics.Blit(data.color, data.cTemp, _matColor);
-                Graphics.Blit(data.cTemp, data.color);
-            });
-        }
         public static (Vector2 pos, bool isInside) Window2Canvas(RectTransform canvasTrans, Vector2 windowPos)
         {
             windowPos -= APInitMgr.I.WindowCenter + canvasTrans.anchoredPosition;
@@ -178,6 +35,180 @@ namespace AP.Brush
 
             return (new Vector2(x, y), x <= 1 && x >= 0 && y <= 1 && y >= 0);
         }
+    }
+
+    public abstract class APBrushSetInfoBase
+    {
+        public abstract void GetValue(APBrushSetInfoBase info);
+    }
+    
+    public static class APBrushPreWriteExt
+    {
+        private static readonly int PreTexAlpha = Shader.PropertyToID("_PreTexAlpha");
+        private static readonly int PreTexShaderName = Shader.PropertyToID("_PreTex");
+        public static void SetBrushPreAlphaToMat(this Material mat, APBrushPreWrite preWrite)
+        {
+            if (preWrite.Released) return;
+            mat.SetTexture(PreTexAlpha, preWrite.AlphaTex);
+        }
+        public static void SetBrushPreColorToMat(this Material mat, APBrushPreWrite preWrite)
+        {
+            if (preWrite.Released) return;
+            mat.SetTexture(PreTexShaderName, preWrite.Tex);
+        }
+    }
+
+    public class APBrushPreWrite : MapBase
+    {
+        public override Texture Tex => _preWriteTexColor;
+        public Texture AlphaTex => _preWriteTexAlpha;
+        public override MapInfoBase Info => null;
+
+        /// <summary>
+        /// 预写入缓存
+        /// </summary>
+        private RenderTexture _preWriteTexColor;
+        private RenderTexture _preWriteTexAlpha;
+        private RenderTexture _pTemp;
+        
+        private static readonly Shader PreClearShader = Shader.Find("Canvas/Clear0000");
+        private static readonly Material PreClearMat = new Material(PreClearShader) { hideFlags = HideFlags.DontSave };
+
+        public APBrushPreWrite(APCanvas canvas) : base((uint)canvas.Width, (uint)canvas.Height, MapRankTypes.NONE)
+        {
+            _preWriteTexColor = new RenderTexture(canvas.Width, canvas.Height, 0, GraphicsFormat.R8G8B8A8_UNorm);
+            _pTemp = new RenderTexture(canvas.Width, canvas.Height, 0, GraphicsFormat.R8G8B8A8_UNorm);
+            _preWriteTexAlpha = new RenderTexture(canvas.Width, canvas.Height, 0, GraphicsFormat.R8_UNorm);
+            _preWriteTexColor.Create();
+            _pTemp.Create();
+            _preWriteTexAlpha.Create();
+
+            DoClear();
+        }
+
+        public void DoClear()
+        {
+            Graphics.Blit(null, _preWriteTexColor, PreClearMat);
+            Graphics.Blit(null, _preWriteTexAlpha, PreClearMat);
+        }
+        public void DoWriteAlpha(Material mat, Texture tex = null)
+        {
+            Graphics.Blit(_preWriteTexAlpha, _pTemp, mat);
+            Graphics.Blit(_pTemp, _preWriteTexAlpha);
+        }
+        public void DoWriteColor(Material mat)
+        {
+            Graphics.Blit(_preWriteTexColor, _pTemp, mat);
+            Graphics.Blit(_pTemp, _preWriteTexColor);
+        }
+        public override void DoRelease()
+        {
+            base.DoRelease();
+            _preWriteTexColor.Release();
+            _pTemp.Release();
+            _preWriteTexAlpha.Release();
+            
+            _preWriteTexColor = null;
+            _pTemp = null;
+            _preWriteTexAlpha = null;
+        }
+    }
+    
+    public abstract class APBrushBase
+    {
+        public Texture PreTex => preWrite.Tex;
+        protected abstract APBrushSetInfoBase Info { get; }
+        protected abstract Material PreWriteMat { get; }
+        protected abstract Material PreWriteAlphaMat { get; }
+
+        protected APCanvas canvas;
+        protected int curLayer;
+        private Action<APBrushSetInfoBase> _infoUpdater;
+
+        protected APBrushPreWrite preWrite;
+        public APBrushBase(APCanvas canvas, int currLayer = -1)
+        {
+            this.canvas = canvas;
+            if (currLayer == -1)
+                curLayer = canvas.FirstLayer;
+            else
+            {
+                curLayer = currLayer;
+            }
+
+            preWrite = canvas.PreWrite;
+        }
+
+        /// <summary>
+        /// 开始写入
+        /// 在 override 时请在开头调用基类中的该函数
+        /// </summary>
+        /// <param name="pos"> 写入位置 </param>
+        public virtual void DoWriteDown(Vector2 pos)
+        {
+            MapRenderer.I.SetPause();
+        }
+        /// <summary>
+        /// 结束写入
+        /// 在 override 时请在结尾处调用基类中的该函数
+        /// </summary>
+        /// <param name="pos"> 写入位置 </param>
+        public virtual void DoWriteUp(Vector2 pos)
+        {
+            MapRenderer.I.SetPause(false);
+        }
+        public virtual void DoCreate(APCanvas canvasIn, int currLayer = -1)
+        {
+            if (canvas != null)
+                DoRelease();
+            
+            canvas = canvasIn;
+            if (currLayer == -1)
+                curLayer = canvas.FirstLayer;
+            else
+            {
+                curLayer = currLayer;
+            }
+
+            preWrite = canvasIn.PreWrite;
+        }
+        public virtual void DoRelease()
+        {
+            preWrite = null;
+            canvas = null;
+            curLayer = -1;
+        }
+        public virtual void SetTex(params Texture[] texs) { }
+        protected virtual void SetPreWriteMat(Vector2 pos) { }
+        /// <summary>
+        /// 从预写入贴图拷贝到指定层级
+        /// override 时请在末尾调用基类中的函数
+        /// 以清除预写入贴图的信息
+        /// </summary>
+        protected virtual void DoWrite()
+        {
+            MapRenderer.I.CanvasWaitSomeFrame();
+            preWrite.DoClear();
+        }
+        protected void DoPreWrite(Vector2 pos)
+        {
+            SetPreWriteMat(pos);
+            preWrite.DoWriteAlpha(PreWriteAlphaMat);
+            preWrite.DoWriteColor(PreWriteMat);
+        }
+        public void SetInfoUpdater(Action<APBrushSetInfoBase> updater)
+        {
+            _infoUpdater = updater;
+        }
+        public void SetInfo()
+        {
+            _infoUpdater?.Invoke(Info);
+        }
+        public void SetInfo(APBrushSetInfoBase info)
+        {
+            Info.GetValue(info);
+        }
+
     }
 }
 

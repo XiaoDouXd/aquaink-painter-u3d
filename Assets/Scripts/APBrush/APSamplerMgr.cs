@@ -29,6 +29,14 @@ namespace AP
         [SerializeField]
         [Range(0.00001f, 0.1f)]
         private float evaporation;
+
+        [Space(10)]
+        [SerializeField]
+        [Range(0, 1000000)]
+        private float defaultSoft = 0;
+        [SerializeField]
+        [Range(-1, 1)]
+        private float defaultAlphaAdd = 0;
         
         
         public float DefuseFactor { get; private set; }
@@ -42,36 +50,42 @@ namespace AP
         
         public float WetMax { get; private set; }
         public float WetMin { get; private set; }
-        
+
+        public float Soft { get; private set; }
+        public float AlphaAdd { get; private set; }
+        public float AlphaAddMin { get; private set; }
+
         public float BrushInterval { get; private set; }
-    
+        
         public void SetColor(APColorPickerUI picker)
         {
             LasColor = CurColor;
             CurColor = picker.colorPicked;
         }
-
         public void SetPenSize(float min, float max)
         {
             PenSizeMin = min;
             PenSizeMax = max;
         }
-
         public void SetWet(float min, float max)
         {
             WetMax = max;
             WetMin = min;
         }
-
         public void SetPaperWet(float def, float eva)
         {
             DefuseFactor = def;
             Evaporation = eva;
         }
-
         public void SetBrushInterval(float interval)
         {
             BrushInterval = interval;
+        }
+        public void SetSoftAndAlphaAdd(float soft, float add, float addMin)
+        {
+            Soft = soft;
+            AlphaAdd = add;
+            AlphaAddMin = addMin;
         }
 
         #region 单例类
@@ -93,6 +107,9 @@ namespace AP
                 DefuseFactor = defuseFactor;
                 Evaporation = evaporation;
                 BrushInterval = defaultBrushInterval;
+                Soft = defaultSoft;
+                AlphaAdd = defaultAlphaAdd;
+                AlphaAddMin = defaultAlphaAdd;
                 
                 DontDestroyOnLoad(gameObject);
             }

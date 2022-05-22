@@ -24,6 +24,9 @@ namespace AP.Canvas
         
         private float _timeCount;
         private bool _refresh;
+        private bool _refreshCanvas;
+        private bool _pause;
+        private bool _canvasWaitSomeframe;
 
         public IEnumerator RenderCoroutine()
         {
@@ -31,8 +34,7 @@ namespace AP.Canvas
             var flowMaps = new MapEnumerable(MapRankTypes.WATER_FLOW);
             var colMap = new MapEnumerable(MapRankTypes.COLOR_FIX);
             var layerMaps = new MapEnumerable(MapRankTypes.LAYER);
-            var canvasMaps = new MapEnumerable(MapRankTypes.CANVAS);
-            
+
             while (Application.isPlaying)
             {
                 if (_refresh)
@@ -40,7 +42,6 @@ namespace AP.Canvas
                     flowMaps = new MapEnumerable(MapRankTypes.WATER_FLOW);
                     colMap = new MapEnumerable(MapRankTypes.COLOR_FIX);
                     layerMaps = new MapEnumerable(MapRankTypes.LAYER);
-                    canvasMaps = new MapEnumerable(MapRankTypes.CANVAS);
                     _refresh = false;
                 }
 
@@ -65,11 +66,37 @@ namespace AP.Canvas
                 
                 if (TimeOut()) yield return null;
 
+                while (_pause)
+                {
+                    yield return null;
+                }
+                
+                yield return null;
+            }
+        }
+        public IEnumerator RenderCanvasCoroutine()
+        {
+            _refreshCanvas = false;
+            var canvasMaps = new MapEnumerable(MapRankTypes.CANVAS);
+            while (Application.isPlaying)
+            {
+                if (_canvasWaitSomeframe)
+                {
+                    yield return null;
+                    _canvasWaitSomeframe = false;
+                }
+                
+                if (_refreshCanvas)
+                {
+                    canvasMaps = new MapEnumerable(MapRankTypes.CANVAS);
+                    _refreshCanvas = false;
+                }
+
                 foreach (var canvas in canvasMaps)
                 {
                     canvas.DoUpdate();
                 }
-                
+
                 yield return null;
             }
         }
@@ -77,8 +104,17 @@ namespace AP.Canvas
         public void Refresh()
         {
             _refresh = true;
+            _refreshCanvas = true;
+        }
+        public void SetPause(bool p = true)
+        {
+            _pause = p;
         }
 
+        public void CanvasWaitSomeFrame()
+        {
+            _canvasWaitSomeframe = true;
+        }
         private bool TimeOut()
         {
             if (_timeCount >= MaxRenderTimeSlice)

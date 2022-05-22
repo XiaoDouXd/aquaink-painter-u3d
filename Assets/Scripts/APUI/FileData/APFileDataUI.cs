@@ -81,9 +81,9 @@ namespace AP.UI
                     paper = APInitMgr.I.defaultPaper1,
                 });
             canvas.SetActive(true);
-            MapRenderer.I.Refresh();
-            
             mask.SetActive(true);
+            
+            MapRenderer.I.Refresh();
         }
     }
 }

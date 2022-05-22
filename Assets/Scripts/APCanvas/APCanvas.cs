@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AP.Brush;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.UI;
@@ -68,6 +69,7 @@ namespace AP.Canvas
         public override Texture Tex => _blurTex;
         public override MapInfoBase Info => null;
         public RawImage Surface { get; private set; }
+        public APBrushPreWrite PreWrite => _preWrite;
 
         public APLayer this[int layerId]
         {
@@ -85,6 +87,7 @@ namespace AP.Canvas
         private RenderTexture _blurTex;
         private RenderTexture _rtTemp;
         private Material _clear;
+        private APBrushPreWrite _preWrite;
         
         private readonly Dictionary<int, APLayer> _layers = new Dictionary<int, APLayer>();
         private readonly LinkedList<int> _layerRank = new LinkedList<int>();
@@ -111,6 +114,8 @@ namespace AP.Canvas
                 Add(paper);
             else
                 Add();
+
+            _preWrite = new APBrushPreWrite(this);
         }
 
         public void UpdateRenderData()
@@ -198,10 +203,9 @@ namespace AP.Canvas
             {
                 throw new ApplicationException("APCanvas.DoUpdate: 错误！死去的Canvas类开始攻击我！");
             }
-            
             base.DoUpdate();
 
-            Graphics.Blit(null, _blurTex, _clear);
+            Graphics.Blit(_preWrite.Tex, _blurTex);
             foreach (var layerId in _layerRank)
             {
                 if (!_layers.ContainsKey(layerId))

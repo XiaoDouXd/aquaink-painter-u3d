@@ -33,8 +33,8 @@ public class APInitMgr : MonoBehaviour
     private RenderTexture _tex;
     private void Start()
     {
-        RenderReset();
         StartCoroutine(MapRenderer.I.RenderCoroutine());
+        StartCoroutine(MapRenderer.I.RenderCanvasCoroutine());
     }
 
     // ---------------------------------------------------------------------------

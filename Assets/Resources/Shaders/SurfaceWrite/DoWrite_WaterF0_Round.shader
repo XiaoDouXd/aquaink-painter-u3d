@@ -15,7 +15,7 @@
             #pragma fragment frag
 
             #include "UnityCG.cginc"
-            #include  "DoWrite_SamplerTrans.cginc"
+            #include  "PreWrite_Input.cginc"
 
             struct v2f
             {
@@ -34,14 +34,15 @@
             // _MainTex 为需要写入的贴图
             sampler2D _MainTex;
             // 湿度
-            unorm float _wet;
+            float _wet;
 
             float4 frag (v2f i) : SV_Target
             {
                 float4 col = tex2D(_MainTex, i.uv);
                 // 画圆
-                float dis = getColorAlpha(i.uv);
+                float dis = preAlpha(i.uv);
                 dis *= _wet;
+                dis = saturate(dis);
                 
                 float4 colNew = dis * float4(4.0/9, 0, 0, 0) + (1 - dis) * col;
                 
