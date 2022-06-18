@@ -45,8 +45,8 @@
                 const float4 pf = tex2D(_Last, i.uv);
                 const float4 pfn = tex2D(_Last, i.uv + v);
                 const float gamma = lerp(1, 0.1, smoothstep(0, 0.5, length(v)));
-                const float3 col = ap_mixbox_kmerp(pf.xyz, pfn.xyz, gamma* pfn.w, _ColTable, sampler_ColTable);
-                float a = lerp(pf.w, pfn.w, gamma*pfn.w);
+                const float3 col = ap_mixbox_kmerp(pf.xyz, pfn.xyz, gamma * pfn.w, _ColTable, sampler_ColTable);
+                float a = lerp(pfn.w, pf.w, gamma * pfn.w);
 
                 const float factor = ap_getFixtureFactor(flow);
                 a = clamp(a - factor * a, 0, 1);

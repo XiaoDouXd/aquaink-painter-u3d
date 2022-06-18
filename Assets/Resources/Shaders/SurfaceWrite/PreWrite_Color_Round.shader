@@ -35,12 +35,16 @@
             sampler2D _MainTex;
             float4 _color;
 
+            float _AlphaThreshold;
+            float getThresholdAlpha(float alpha)
+            {
+                return saturate((alpha - _AlphaThreshold) / (1.0 - _AlphaThreshold));
+            }
+
             float4 frag (v2f i) : SV_Target
             {
-                //float4 col = tex2D(_MainTex, i.uv);
-                
                 // 画圆
-                float dis = preAlpha(i.uv);
+                float dis = getThresholdAlpha(preAlpha(i.uv));
                 float a = _color.a * dis;
                 
                 return float4(_color.xyz, a);

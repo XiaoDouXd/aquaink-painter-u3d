@@ -46,7 +46,7 @@
                 float4 colPre = preCol(i.uv);
                 
                 float3 colNew = ap_mixbox_kmerp(col.xyz, colPre.xyz, colPre.a, _ColTable, sampler_ColTable);
-                float a = col.a + colPre.a;
+                float a = saturate(col.a + colPre.a);
                 
                 return float4(colNew, a);
             }

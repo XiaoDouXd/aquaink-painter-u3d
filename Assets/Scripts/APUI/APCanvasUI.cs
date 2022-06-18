@@ -105,6 +105,11 @@ namespace AP.UI
             
             _brush?.SetColor(APSamplerMgr.I.CurColor);
             _brush?.SetBrushInterval(APSamplerMgr.I.BrushInterval);
+
+            if (Pen.current.press.wasPressedThisFrame || Mouse.current.press.wasPressedThisFrame)
+            {
+                _brush?.SetRotation(Time.time);
+            }
             
             if (Pen.current.pressure.IsActuated())
             {
@@ -122,12 +127,18 @@ namespace AP.UI
                         APSamplerMgr.I.AlphaAddMin,
                         APSamplerMgr.I.AlphaAdd,
                         Pen.current.pressure.ReadValue()));
+                _brush?.SetShapeFactor(
+                    Mathf.Clamp01(Pen.current.pressure.ReadValue() - 0.1f)
+                    );
+                _brush?.SetPressure(Pen.current.pressure.ReadValue());
             }
             else if (Mouse.current.leftButton.wasPressedThisFrame)
             {
                 _brush?.SetRadius(APSamplerMgr.I.PenSizeMax);
                 _brush?.SetWet(APSamplerMgr.I.WetMax);
                 _brush?.SetSoftAndAlphaAdd(APSamplerMgr.I.Soft, APSamplerMgr.I.AlphaAddMin);
+                _brush?.SetShapeFactor(0);
+                _brush?.SetPressure(1);
             }
 
             if (Keyboard.current.spaceKey.wasPressedThisFrame)
@@ -223,7 +234,7 @@ namespace AP.UI
         {
             if (!_inited) return;
             if (_moving) return;
-            _background.localScale += new Vector3(0.1f * eventData.scrollDelta.y, 0.1f * eventData.scrollDelta.y, 0);
+            _background.localScale += new Vector3(0.01f * eventData.scrollDelta.y, 0.01f * eventData.scrollDelta.y, 0);
         }
         public void OnPointerUp(PointerEventData eventData)
         {

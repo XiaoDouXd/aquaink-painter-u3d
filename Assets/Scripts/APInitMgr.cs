@@ -10,16 +10,10 @@ public class APInitMgr : MonoBehaviour
     
     [Space(20)]
     [Tooltip("默认纸张纹理")]
-    public Texture2D defaultPaper1;
-    [Tooltip("默认纸张纹理")]
-    public Texture2D defaultPaper2;
-    [Tooltip("默认纸张纹理")]
-    public Texture2D defaultPaper3;
-    [Tooltip("默认纸张纹理")]
-    public Texture2D defaultPaper4;
-    [Tooltip("默认纸张纹理")]
-    public Texture2D defaultPaper5;
-    
+    public Texture2D defaultPaper;
+    [Tooltip("默认纸张阻塞纹理")]
+    public Texture2D defaultPaperSub;
+
     [Space(20)]
     [Tooltip("UI根节点")]
     public RectTransform surfaceRoot;

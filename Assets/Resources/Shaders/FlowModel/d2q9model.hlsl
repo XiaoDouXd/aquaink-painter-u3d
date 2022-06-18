@@ -32,10 +32,10 @@ static const float avgRho = 1.0 / RHO0;                                 // Âπ≥Âù
 #define K3 0.1
 #define K4 0.1
 
-#define Q1 0.0001
-#define Q2 0.0001
-#define Q3 0.01
-#define THETA 0.005
+#define Q1 0.1
+#define Q2 0.1
+#define Q3 0.1
+#define THETA 0.5
 
 #define XI 0.005
 #define MU 0.005

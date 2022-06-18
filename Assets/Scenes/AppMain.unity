@@ -765,7 +765,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 48145739}
   m_Direction: 0
   m_MinValue: 0
-  m_MaxValue: 5
+  m_MaxValue: 25
   m_WholeNumbers: 0
   m_Value: 0
   m_OnValueChanged:
@@ -5757,7 +5757,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 825728277}
   m_Direction: 0
   m_MinValue: 0.001
-  m_MaxValue: 0.5
+  m_MaxValue: 2
   m_WholeNumbers: 0
   m_Value: 0
   m_OnValueChanged:
@@ -9858,8 +9858,8 @@ MonoBehaviour:
   m_FillRect: {fileID: 0}
   m_HandleRect: {fileID: 234204189}
   m_Direction: 0
-  m_MinValue: 0.0001
-  m_MaxValue: 0.2
+  m_MinValue: 0.00001
+  m_MaxValue: 2
   m_WholeNumbers: 0
   m_Value: 0
   m_OnValueChanged:
@@ -10558,11 +10558,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colorTable: {fileID: 2800000, guid: 3a71859f5d5239f40872b696a597ea2a, type: 3}
-  defaultPaper1: {fileID: 2800000, guid: ed0d754ab708cef4394460049392607b, type: 3}
-  defaultPaper2: {fileID: 0}
-  defaultPaper3: {fileID: 0}
-  defaultPaper4: {fileID: 0}
-  defaultPaper5: {fileID: 0}
+  defaultPaper: {fileID: 2800000, guid: ed0d754ab708cef4394460049392607b, type: 3}
+  defaultPaperSub: {fileID: 2800000, guid: 93fa95b149ef2994aad3f2456e427beb, type: 3}
   surfaceRoot: {fileID: 2135434243}
   brushTex1: {fileID: 2800000, guid: 4941843c2052ee546b3f8abb65e7e6c5, type: 3}
 --- !u!114 &2068270960
@@ -10702,7 +10699,7 @@ MonoBehaviour:
   penSizeMax: 0.08
   penSizeMin: 0.01
   defaultWet: 1
-  defaultBrushInterval: 0.006
+  defaultBrushInterval: 0.003
   defuseFactor: 0.05
   evaporation: 0.0002
   defaultSoft: 0

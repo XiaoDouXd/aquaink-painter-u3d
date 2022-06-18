@@ -94,8 +94,8 @@ AP_D2Q9_Fi ap_tex2D_kp(
     // 计算 sigma
     // const float sigma = Q1 + o.k.w * Q2 + Q3 * lerp(o.k.x, p.z, smoothstep(0, THETA, o.k.z));
     // const float sqrt2_sigma = sqrt(2) * sigma;
-    //
-    // // 采样并计算密度
+    
+    // 采样并计算密度
     bool isPin = false;
     // isPin = isPin && (__AP_D2Q9_PRIVATE_RHO(ap_tex2D(tex0, tex1234, tex5678, uv + float2( deltaUV.x, 0))) <= sigma);
     // isPin = isPin && (__AP_D2Q9_PRIVATE_RHO(ap_tex2D(tex0, tex1234, tex5678, uv + float2(-deltaUV.x, 0))) <= sigma);

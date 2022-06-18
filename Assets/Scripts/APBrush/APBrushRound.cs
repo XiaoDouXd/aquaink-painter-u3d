@@ -11,6 +11,9 @@ namespace AP.Brush
         public float interval = 0.01f;
         public float soft;
         public float alphaAdd;
+        public float shape;
+        public float angle;
+        public float pressure;
 
         public override void GetValue(APBrushSetInfoBase info)
         {
@@ -21,9 +24,13 @@ namespace AP.Brush
             wet = i.wet;
             color = i.color;
             interval = i.interval;
+            shape = i.shape;
+            soft = i.soft;
+            alphaAdd = i.alphaAdd;
+            angle = i.angle;
+            pressure = i.pressure;
         }
     }
-    
     public class APBrushRound : APBrushBase
     {
         protected override APBrushSetInfoBase Info => _info;
@@ -65,21 +72,11 @@ namespace AP.Brush
             _matWrite5678.SetBrushPreAlphaToMat(preWrite);
             _matWrite0.SetBrushPreAlphaToMat(preWrite);
             _preWriteMaterial.SetBrushPreAlphaToMat(preWrite);
+            _preWriteAlphaMaterial.SetTexture(DoWriteTransPaperSub, APInitMgr.I.defaultPaperSub);
+            _preWriteAlphaMaterial.SetVector(DoWriteTransPaperSubTrans, 
+                new Vector2(1, 1));
 
             _info = new APBrushRoundSetInfo();
-        }
-
-        public void SetColor(Color color)
-        {
-            _info.color = color;
-        }
-        public void SetWet(float wet)
-        {
-            _info.wet = wet;
-        }
-        public void SetRadius(float radius)
-        {
-            _info.radius = radius;
         }
 
         public override void DoCreate(APCanvas canvasIn, int currLayer = -1)
@@ -96,6 +93,18 @@ namespace AP.Brush
             
             _preWriteAlphaMaterial.SetTexture(DoWriteTransBrush, tex[0]);
         }
+        public void SetColor(Color color)
+        {
+            _info.color = color;
+        }
+        public void SetWet(float wet)
+        {
+            _info.wet = wet;
+        }
+        public void SetRadius(float radius)
+        {
+            _info.radius = radius;
+        }
         public void SetBrushInterval(float interval)
         {
             _info.interval = interval;
@@ -105,10 +114,26 @@ namespace AP.Brush
             _info.soft = soft;
             _info.alphaAdd = alphaAdd;
         }
+        public void SetShapeFactor(float shape)
+        {
+            _info.shape = shape;
+        }
+        public void SetRotation(float angle)
+        {
+            _info.angle = angle;
+        }
+        public void SetPressure(float press)
+        {
+            _info.pressure = press;
+        }
 
         // 等间距笔画实现
         private bool _drawStart;
         private Vector2 _posLast;
+        private static readonly int AlphaThreshold = Shader.PropertyToID("_AlphaThreshold");
+        private static readonly int DoWriteTransPaperSub = Shader.PropertyToID("_DoWriteTrans_paperSub");
+        private static readonly int DoWriteTransPaperSubTrans = Shader.PropertyToID("_DoWriteTrans_paperSubTrans");
+        private static readonly int DoWriteTransPress = Shader.PropertyToID("_DoWriteTrans_press");
 
         public override void DoWriteDown(Vector2 pos)
         {
@@ -148,13 +173,14 @@ namespace AP.Brush
         protected override void SetPreWriteMat(Vector2 pos)
         {
             Vector4 rect = new Vector4(pos.x - _info.radius, pos.y - _info.radius, pos.x + _info.radius, pos.y + _info.radius);
-            Vector2 rota = new Vector2(Mathf.Cos(Time.time), Mathf.Sin(Time.time));
+            Vector2 rota = new Vector2(Mathf.Cos(_info.angle), Mathf.Sin(_info.angle));
             Vector2 wh = new Vector2(canvas.Width, canvas.Height);
             
             PreWriteAlphaMat.SetVector(DoWriteTransRect, rect);
             PreWriteAlphaMat.SetVector(DoWriteTransRotaWh, new Vector4(rota.x, rota.y, wh.x, wh.y));
             PreWriteAlphaMat.SetFloat(DoWriteTransAlphaAdd, _info.alphaAdd);
             PreWriteAlphaMat.SetFloat(DoWriteTransSoft, _info.soft);
+            PreWriteAlphaMat.SetFloat(DoWriteTransPress, _info.pressure);
             PreWriteMat.SetColor(BrushColor, _info.color);
         }
         protected override Material PreWriteMat => _preWriteMaterial;
@@ -167,6 +193,7 @@ namespace AP.Brush
             _matWrite1234.SetFloat(Wet, _info.wet);
             _matWrite5678.SetFloat(Wet, _info.wet);
             _matColor.SetColor(BrushColor, _info.color);
+            _preWriteMaterial.SetFloat(AlphaThreshold, _info.shape);
 
             canvas[curLayer]?.DoWrite((info) =>
             {

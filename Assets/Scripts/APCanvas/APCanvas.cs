@@ -178,7 +178,7 @@ namespace AP.Canvas
                 throw new ApplicationException("APCanvas.Add: 错误！死去的Canvas类开始攻击我！");
             }
             
-            var layer = new APLayer(Width, Height, APInitMgr.I.defaultPaper1, NewIdx());
+            var layer = new APLayer(Width, Height, APInitMgr.I.defaultPaper, NewIdx());
             layer.Name = $"新建图层{_newLayerCount}";
 
             _layers.Add(layer.Id, layer);

@@ -78,7 +78,7 @@ namespace AP.UI
                 {
                     width = _wid,
                     height = _hei,
-                    paper = APInitMgr.I.defaultPaper1,
+                    paper = APInitMgr.I.defaultPaper,
                 });
             canvas.SetActive(true);
             mask.SetActive(true);
