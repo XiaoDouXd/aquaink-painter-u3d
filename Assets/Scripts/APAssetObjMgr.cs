@@ -5,18 +5,15 @@ using UnityEngine;
 [Serializable]
 public enum Domain : byte
 {
-    NONE = 0,
-    CANVAS = 1,
-    UI = 2,
+    None = 0,
+    Canvas = 1,
+    UI = 2
 }
 
 public class APAssetObjMgr : MonoBehaviour
 {
     public Domain domain;
     public List<GameObject> objs;
-
-    private Dictionary<string, GameObject> _objs = 
-        new Dictionary<string, GameObject>();
 
     public GameObject Clone(string objName, GameObject parent)
     {
@@ -34,27 +31,27 @@ public class APAssetObjMgr : MonoBehaviour
             o.SetActive(true);
             return o;
         }
-            
+
     }
-    
-    #region 多例类
-    public static APAssetObjMgr CanvasObjs => _cI;
+
+    private readonly Dictionary<string, GameObject> _objs = new();
+
+    #region Inst
+
     public static APAssetObjMgr UIObjs => _uI;
-    
-    private static APAssetObjMgr _cI;
-    private static APAssetObjMgr _uI;
-    
+    public static APAssetObjMgr CanvasObjs => _cI;
+
     private void Awake()
     {
         var illegal = false;
-        
+
         // 单例类
         switch (domain)
         {
-            case Domain.NONE:
+            case Domain.None:
                 Destroy(gameObject);
                 break;
-            case Domain.CANVAS:
+            case Domain.Canvas:
                 if (_cI == null)
                 {
                     _cI = this;
@@ -74,10 +71,11 @@ public class APAssetObjMgr : MonoBehaviour
                 Destroy(gameObject);
                 illegal = true;
                 break;
+            default: throw new ArgumentOutOfRangeException();
         }
 
         if (illegal) return;
-        
+
         // 收取游戏物体
         foreach (var obj in objs)
         {
@@ -85,5 +83,9 @@ public class APAssetObjMgr : MonoBehaviour
             obj.SetActive(false);
         }
     }
+
+    private static APAssetObjMgr _cI;
+    private static APAssetObjMgr _uI;
+
     #endregion
 }

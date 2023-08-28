@@ -59,7 +59,7 @@ namespace AP.Canvas
         /// <param name="recreateShaderName"> 重构的Shader索引 </param>
         /// <param name="depth"> 深度 </param>
         protected MapFlowBase(int width, int height, string recreateShaderName = null, int depth = 0) 
-            : base((uint)width, (uint)height, MapRankTypes.WATER_FLOW)
+            : base((uint)width, (uint)height, MapRankTypes.WaterFlow)
         {
             _depth = depth;
             _rtVelocity = new RenderTexture(Width, Height, _depth, GraphicsFormat.R16G16_SFloat);

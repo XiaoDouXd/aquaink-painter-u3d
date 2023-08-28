@@ -9,13 +9,52 @@ namespace AP.Canvas
     /// </summary>
     public abstract partial class MapBase
     {
-        // 一级表
-        private static readonly LinkedList<MapBaseList> InstList = new LinkedList<MapBaseList>();
-        // 本体在二级表的索引
-        private LinkedListNode<MapBase> _mapListNode;
-        private MapBaseList _mapBaseList;
-        
-        
+        /// <summary>
+        /// 全局贴图遍历器
+        /// </summary>
+        public class MapEnumerable : IEnumerable<MapBase>
+        {
+            public MapEnumerable(MapRankTypes? code = null)
+            {
+                if (code == null) return;
+                _setCode = true;
+
+                foreach (var inst in InstList.Where(inst => inst.Code == (uint) code))
+                {
+                    _list = inst;
+                    return;
+                }
+            }
+
+            public IEnumerator<MapBase> GetEnumerator()
+            {
+                if ((_list == null || _list.Empty) && _setCode)
+                    yield break;
+
+                if (_list != null)
+                {
+                    foreach (var map in _list)
+                    {
+                        yield return map;
+                    }
+                    yield break;
+                }
+
+                foreach (var map in InstList.SelectMany(inst => inst))
+                {
+                    yield return map;
+                }
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return this.GetEnumerator();
+            }
+
+            private readonly MapBaseList _list;
+            private readonly bool _setCode;
+        }
+
         /// <summary>
         /// 插队
         /// </summary>
@@ -30,7 +69,7 @@ namespace AP.Canvas
                 InstList.AddLast(mapList);
                 return;
             }
-            
+
             while (inst.Next != null)
             {
                 if (inst.Value.Code == code)
@@ -61,6 +100,13 @@ namespace AP.Canvas
             }
         }
 
+        // 本体在二级表的索引
+        private LinkedListNode<MapBase> _mapListNode;
+        private MapBaseList _mapBaseList;
+
+        // 一级表
+        private static readonly LinkedList<MapBaseList> InstList = new();
+
         /// <summary>
         /// 贴图集集
         /// </summary>
@@ -68,9 +114,6 @@ namespace AP.Canvas
         {
             public uint Code { get; }
             public bool Empty => _mapList == null || _mapList.Count == 0;
-
-            private LinkedList<MapBase> _mapList;
-            private LinkedListNode<MapBaseList> _thisInList;
 
             public MapBaseList(uint code)
             {
@@ -91,7 +134,7 @@ namespace AP.Canvas
             {
                 _mapList.Remove(map._mapListNode);
                 if (_mapList.Count != 0) return;
-                
+
                 InstList.Remove(_thisInList);
                 _thisInList = null;
                 _mapList = null;
@@ -107,54 +150,11 @@ namespace AP.Canvas
                     yield return map;
                 }
             }
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return this.GetEnumerator();
-            }
-        }
-        /// <summary>
-        /// 全局贴图遍历器
-        /// </summary>
-        public class MapEnumerable : IEnumerable<MapBase>
-        {
-            private readonly MapBaseList _list;
-            private readonly bool _setCode;
 
-            public MapEnumerable(MapRankTypes? code = null)
-            {
-                if (code == null) return;
-                _setCode = true;
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-                foreach (var inst in InstList.Where(inst => inst.Code == (uint) code))
-                {
-                    _list = inst;
-                    return;
-                }
-            }
-            
-            public IEnumerator<MapBase> GetEnumerator()
-            {
-                if ((_list == null || _list.Empty) && _setCode) 
-                    yield break;
-                
-                if (_list != null)
-                {
-                    foreach (var map in _list)
-                    {
-                        yield return map;
-                    }
-                    yield break;
-                }
-                
-                foreach (var map in InstList.SelectMany(inst => inst))
-                {
-                    yield return map;
-                }
-            }
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return this.GetEnumerator();
-            }
+            private LinkedList<MapBase> _mapList;
+            private LinkedListNode<MapBaseList> _thisInList;
         }
     }
 }

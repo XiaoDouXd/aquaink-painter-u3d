@@ -15,6 +15,7 @@ namespace AP.UI
                 UpdateRect();
             }
         }
+
         public float H
         {
             get => _h;
@@ -24,13 +25,6 @@ namespace AP.UI
                 UpdateRect();
             }
         }
-
-        private APColorPickerUI _picker;
-        private Vector2 _sv;
-        private float _h;
-        private RawImage _rect;
-        private RectTransform _rt;
-        private static readonly int TargetPos = Shader.PropertyToID("_TargetPos");
 
         private void UpdateRect()
         {
@@ -62,6 +56,7 @@ namespace AP.UI
         {
             _picker = picker;
         }
+
         public void UpdateColor()
         {
             _sv = new Vector2(_picker.HSV.y, _picker.HSV.z);
@@ -70,5 +65,12 @@ namespace AP.UI
             pos -= Vector2.one * (Vector2.one - pos);
             _rect.material.SetVector(TargetPos, new Vector4(pos.x, pos.y, _h, 0));
         }
+
+        private APColorPickerUI _picker;
+        private Vector2 _sv;
+        private float _h;
+        private RawImage _rect;
+        private RectTransform _rt;
+        private static readonly int TargetPos = Shader.PropertyToID("_TargetPos");
     }
 }

@@ -25,7 +25,7 @@ namespace AP.Canvas
             cTemp = null;
         }
     }
-    
+
     public class APColor : MapBase
     {
         public override Texture Tex => _tex;
@@ -37,33 +37,8 @@ namespace AP.Canvas
             cTemp = _rtTemp,
         };
 
-        private RenderTexture _tex;
-        private RenderTexture _glue;
-        private RenderTexture _colAdv;
-        private RenderTexture _colFix;
-        private RenderTexture _rtTemp;
-
-        private readonly Material _matShow;
-        private readonly Material _matGlue;
-        private readonly Material _matColAdv;
-        private readonly Material _matColFix;
-
-        private static readonly int Flow = Shader.PropertyToID("_Flow");
-        private static readonly int Delta = Shader.PropertyToID("_Delta");
-        private static readonly int Last = Shader.PropertyToID("_Last");
-        private static readonly int ColTable = Shader.PropertyToID("_ColTable");
-        private static readonly int Adv = Shader.PropertyToID("_Adv");
-        private static readonly int Fix = Shader.PropertyToID("_Fix");
-        
-        private static readonly Shader ColClearShader = Shader.Find("Canvas/Clear1110");
-        private static readonly Shader ColAdvShader = Shader.Find("COL_UPD/ColUpdate_Adv");
-        private static readonly Shader ColFixShader = Shader.Find("COL_UPD/ColUpdate_Fix");
-        private static readonly Shader ColShowShader = Shader.Find("COL_UPD/ColUpdate_Show");
-        private static readonly Shader GlueShader = Shader.Find("COL_UPD/ColUpdate_Glue");
-        private static readonly int Eta = Shader.PropertyToID("ETA");
-
-        public APColor(int width, int height, APFlow d2Q9) : 
-            base((uint)width, (uint)height, MapRankTypes.COLOR_FIX)
+        public APColor(int width, int height, APFlow d2Q9) :
+            base((uint)width, (uint)height, MapRankTypes.ColorFix)
         {
             var d2Q9Map = d2Q9;
 
@@ -105,13 +80,14 @@ namespace AP.Canvas
             _matShow.SetTexture(Fix, _colFix);
             _matShow.SetTexture(ColTable, APInitMgr.I.colorTable);
         }
+
         public override void DoUpdate()
         {
             if (Released)
             {
                 throw new ApplicationException("APColor.DoUpdate: 错误！死去的Color类开始攻击我！");
             }
-            
+
             base.DoUpdate();
             Graphics.Blit(null, _rtTemp, _matColFix);
             Graphics.Blit(_rtTemp, _colFix);
@@ -121,44 +97,47 @@ namespace AP.Canvas
             Graphics.Blit(_rtTemp, _glue);
             Graphics.Blit(null, _tex, _matShow);
         }
+
         public override void DoLoad(MapInfoBase info)
         {
             if (Released)
             {
                 throw new ApplicationException("APColor.DoLoad: 错误！死去的Color类开始攻击我！");
             }
-            
+
             base.DoLoad(info);
             var i = info as APColorInfo;
             if (i == null) return;
-            
+
             Graphics.Blit(i.glue, _glue);
             Graphics.Blit(i.fix, _colFix);
             Graphics.Blit(i.adv, _colAdv);
         }
+
         public override MapInfoBase DoSave(MapInfoBase container)
         {
             if (Released)
             {
                 throw new ApplicationException("APColor.DoSave: 错误！死去的Color类开始攻击我！");
             }
-            
+
             var i = container as APColorInfo;
             if (i == null) return container;
-            
+
             Graphics.Blit(_colFix, i.fix);
             Graphics.Blit(_colAdv, i.adv);
             Graphics.Blit(_glue, i.glue);
 
             return i;
         }
+
         public override MapInfoBase NewEmptyInfo()
         {
             if (Released)
             {
                 throw new ApplicationException("APColor.NewEmptyInfo: 错误！死去的Color类开始攻击我！");
             }
-            
+
             var i = new APColorInfo()
             {
                 map = this,
@@ -167,21 +146,22 @@ namespace AP.Canvas
                 glue = new RenderTexture(Width, Height, 0, GraphicsFormat.R8_UNorm),
                 cTemp = null,
             };
-            
+
             return i;
         }
+
         public override void DoRelease()
         {
             if (Released) return;
-            
+
             base.DoRelease();
-            
+
             if (_tex != null) _tex.Release();
             if (_glue != null) _glue.Release();
             if (_colAdv != null) _colAdv.Release();
             if (_colFix != null) _colFix.Release();
             if (_rtTemp != null) _rtTemp.Release();
-            
+
             _tex = null;
             _glue = null;
             _colAdv = null;
@@ -195,6 +175,31 @@ namespace AP.Canvas
             _matColFix.SetFloat(Eta, APSamplerMgr.I.DefuseFactor);
             _matGlue.SetFloat(Eta, APSamplerMgr.I.DefuseFactor);
         }
+
+        private RenderTexture _tex;
+        private RenderTexture _glue;
+        private RenderTexture _colAdv;
+        private RenderTexture _colFix;
+        private RenderTexture _rtTemp;
+
+        private readonly Material _matShow;
+        private readonly Material _matGlue;
+        private readonly Material _matColAdv;
+        private readonly Material _matColFix;
+
+        private static readonly int Flow = Shader.PropertyToID("_Flow");
+        private static readonly int Delta = Shader.PropertyToID("_Delta");
+        private static readonly int Last = Shader.PropertyToID("_Last");
+        private static readonly int ColTable = Shader.PropertyToID("_ColTable");
+        private static readonly int Adv = Shader.PropertyToID("_Adv");
+        private static readonly int Fix = Shader.PropertyToID("_Fix");
+
+        private static readonly Shader ColClearShader = Shader.Find("Canvas/Clear1110");
+        private static readonly Shader ColAdvShader = Shader.Find("COL_UPD/ColUpdate_Adv");
+        private static readonly Shader ColFixShader = Shader.Find("COL_UPD/ColUpdate_Fix");
+        private static readonly Shader ColShowShader = Shader.Find("COL_UPD/ColUpdate_Show");
+        private static readonly Shader GlueShader = Shader.Find("COL_UPD/ColUpdate_Glue");
+        private static readonly int Eta = Shader.PropertyToID("ETA");
     }
 }
 

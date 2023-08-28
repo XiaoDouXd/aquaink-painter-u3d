@@ -7,24 +7,14 @@ using UnityEngine.UI;
 public class APLeftPanelTabItemUI : MonoBehaviour
 {
     public bool IsDebut => _debuting;
-    
+
     public Action<APLeftPanelTabItemUI> debutComplete;
     public Action<APLeftPanelTabItemUI> startComplete;
-
-    private UITabInfo _info;
-    private Text _text;
-    private RectTransform _rectTransform;
-    private Vector2 _defaultSize;
-    private Button _button;
-    private Animator _buttonAnimator;
-    private bool _debuting;
-    private bool _started;
-    private bool _inited;
 
     public void Debut()
     {
         if (!_inited) return;
-        
+
         _debuting = true;
         _buttonAnimator.enabled = false;
         var desc = LeanTween.size(_rectTransform, _defaultSize, 1f);
@@ -44,9 +34,8 @@ public class APLeftPanelTabItemUI : MonoBehaviour
         _info = info;
         var tabName = "";
         foreach (var c in _info.name)
-        {
             tabName += $"{c}\n";
-        }
+
         _text.text = tabName.Substring(0, Mathf.Max(tabName.Length-1, 0) );
         _defaultSize.y = _text.preferredHeight + 50;
         _rectTransform.sizeDelta = new Vector2(0, _defaultSize.y);
@@ -54,10 +43,9 @@ public class APLeftPanelTabItemUI : MonoBehaviour
         _info.deselect += Deselect;
 
         _inited = true;
-        
         Debut();
     }
-    
+
     private void Select(UITabInfo info)
     {
         _button.Select();
@@ -68,7 +56,7 @@ public class APLeftPanelTabItemUI : MonoBehaviour
         _button.OnDeselect(null);
         _info.isChosen = true;
     }
-    
+
     private void Awake()
     {
         _text = GetComponentInChildren<Text>();
@@ -86,4 +74,15 @@ public class APLeftPanelTabItemUI : MonoBehaviour
 
         startComplete?.Invoke(this);
     }
+
+    private bool _inited;
+    private bool _started;
+    private bool _debuting;
+    private UITabInfo _info;
+    private Text _text;
+    private RectTransform _rectTransform;
+    private Vector2 _defaultSize;
+    private Button _button;
+    private Animator _buttonAnimator;
+
 }

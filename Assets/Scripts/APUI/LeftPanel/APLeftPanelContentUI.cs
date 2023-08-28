@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using AP.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,12 +9,7 @@ namespace AP.UI
         public RectMask2D mask;
         public APLeftPanelTabItemUI CurShow { get; private set; }
         public APLeftPanelTabItemUI NexShow { get; private set; }
-    
-        private Dictionary<APLeftPanelTabItemUI, APLeftPanelContentItemUI> _content =
-            new Dictionary<APLeftPanelTabItemUI, APLeftPanelContentItemUI>();
-        private bool _showing;
-        private bool _exiting;
-    
+
         public void Init(APLeftPanelTabUI tabs)
         {
             foreach (var tab in tabs.tabs)
@@ -31,20 +24,22 @@ namespace AP.UI
             if (_showing || _exiting)
             {
                 NexShow = tab;
-                
+
                 mask.enabled = _showing || _exiting;
                 return;
             }
+
             if (tab == null && CurShow != null)
             {
                 _content[CurShow].Exit();
                 _exiting = true;
                 CurShow = null;
-                
+
                 mask.enabled = _showing || _exiting;
                 return;
             }
-            else if (tab == null)
+
+            if (tab == null)
             {
                 mask.enabled = _showing || _exiting;
                 return;
@@ -58,12 +53,13 @@ namespace AP.UI
                 mask.enabled = _showing || _exiting;
                 return;
             }
-            
+
             CurShow = tab;
             _content[tab].Show();
             _showing = true;
             mask.enabled = _showing || _exiting;
         }
+
         public void OnItemShowComplete(APLeftPanelTabItemUI tab, APLeftPanelContentItemUI item)
         {
             if (NexShow != null)
@@ -77,6 +73,7 @@ namespace AP.UI
             mask.enabled = _showing || _exiting;
             APInitMgr.I.RenderReset();
         }
+
         public void OnItemExitComplete(APLeftPanelTabItemUI tab, APLeftPanelContentItemUI item)
         {
             if (NexShow != null)
@@ -87,12 +84,16 @@ namespace AP.UI
 
                 _showing = true;
             }
-            
+
             _exiting = false;
-            
+
             mask.enabled = _showing || _exiting;
             APInitMgr.I.RenderReset();
         }
+
+        private bool _showing;
+        private bool _exiting;
+        private readonly Dictionary<APLeftPanelTabItemUI, APLeftPanelContentItemUI> _content = new();
     }
 }
 

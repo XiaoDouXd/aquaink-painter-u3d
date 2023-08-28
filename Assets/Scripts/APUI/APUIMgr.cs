@@ -3,19 +3,20 @@ using UnityEngine.InputSystem;
 
 public class APUIMgr : MonoBehaviour
 {
+    public float canvasScalerWid;
+
     public bool EnableUIEvent { get; set; }
     public GameObject UIRoot => gameObject;
-    public float canvasScalerWid;
 
     private void Start()
     {
         EnableUIEvent = true;
     }
-    
+
     #region 单例类
+
     public static APUIMgr I => _i;
-    private static APUIMgr _i;
-    
+
     private void Awake()
     {
         if (_i == null)
@@ -23,49 +24,38 @@ public class APUIMgr : MonoBehaviour
             _i = this;
             DontDestroyOnLoad(gameObject);
         }
-        else
-            Destroy(gameObject);
+        else Destroy(gameObject);
     }
+
+    private static APUIMgr _i;
+
     #endregion
+
     #region 工具函数
+
     public GameObject Clone(GameObject obj, GameObject parent = null)
     {
-        if (!obj) return null;
-        if (parent)
-            return Instantiate(obj, parent.transform);
-        else
-            return Instantiate(obj, obj.transform.parent);
+        return !obj ? null : Instantiate(obj, parent ? parent.transform : obj.transform.parent);
     }
     public (Vector2 pos, bool isInside) MousePos2Rect(RectTransform rt)
     {
-        if (!rt)
-            return (Input.mousePosition, false);
-        
+        if (!rt) return (Input.mousePosition, false);
+
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                rt, 
-                Mouse.current.position.ReadValue(), 
-                Camera.main, 
+                rt,
+                Mouse.current.position.ReadValue(),
+                Camera.main,
                 out var pos);
 
         var rect = rt.rect;
         var x = (pos.x + rect.width * 0.5f) / rect.width;
         var y = (pos.y + rect.height * 0.5f) / rect.height;
-        
-        return (new Vector2(x, y), x <= 1 && x >= 0 && y <= 1 && y >= 0);
-    }
-    public Vector2 Clamp01(Vector2 i)
-    {
-        return new Vector2(Mathf.Clamp01(i.x), Mathf.Clamp01(i.y));
+        return (new Vector2(x, y), x is <= 1 and >= 0 && y is <= 1 and >= 0);
     }
 
-    public float SignedAngle(Vector2 from, Vector2 to)
-    {
-        return Vector2.SignedAngle(from, to) + 180;
-    }
+    public Vector2 Clamp01(Vector2 i) => new(Mathf.Clamp01(i.x), Mathf.Clamp01(i.y));
+    public float SignedAngle(Vector2 from, Vector2 to) => Vector2.SignedAngle(from, to) + 180;
+    public float GetCanvasScaleHeight() => canvasScalerWid / APInitMgr.I.WindowAspect;
 
-    public float GetCanvasScaleHeight()
-    {
-        return canvasScalerWid / APInitMgr.I.WindowAspect;
-    }
     #endregion
 }

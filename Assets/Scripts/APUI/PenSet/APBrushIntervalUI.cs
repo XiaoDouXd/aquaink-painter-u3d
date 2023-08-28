@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,7 +11,7 @@ namespace AP.UI
         {
             APSamplerMgr.I.SetBrushInterval(maxSlider.value);
         }
-    
+
         private void Start()
         {
             maxSlider.value = APSamplerMgr.I.BrushInterval;

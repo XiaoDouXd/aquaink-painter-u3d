@@ -22,7 +22,7 @@ namespace AP.Canvas
         
         private static readonly int LastTex1234 = Shader.PropertyToID("_LastTex");
 
-        public MapFlowD2Q4(int width, int height) : base((uint)width, (uint)height, MapRankTypes.WATER_FLOW)
+        public MapFlowD2Q4(int width, int height) : base((uint)width, (uint)height, MapRankTypes.WaterFlow)
         {
             InitMats();
             

@@ -9,7 +9,7 @@ namespace AP.Canvas
         public RenderTexture f1234;
         public RenderTexture f5678;
         public RenderTexture fTemp;
-        
+
         public RenderTexture color;
         public RenderTexture cTemp;
 
@@ -46,16 +46,8 @@ namespace AP.Canvas
         public string Name { get => _name; set => _name = value; }
         public LayerBlurType BlurType { get => _blurType; set => _blurType = value; }
         public APCanvasBlurMat Blur => _blurMat;
-        
-        private APLayerInfo _info;
-        private int _id;
-        private string _name;
-        private LayerBlurType _blurType;
-        private APCanvasBlurMat _blurMat;
-        private APColor _col;
-        private APFlow _flow;
 
-        public APLayer(int width, int height, Texture paper, int id) : base((uint)width, (uint)height, MapRankTypes.LAYER)
+        public APLayer(int width, int height, Texture paper, int id) : base((uint)width, (uint)height, MapRankTypes.Layer)
         {
             _flow = new APFlow(width, height, paper);
             _col = new APColor(width, height, _flow);
@@ -63,18 +55,18 @@ namespace AP.Canvas
 
             _id = id;
             _name = "新建图层";
-            _blurType = LayerBlurType.NORMAL;
+            _blurType = LayerBlurType.Normal;
 
             var flowData = _flow.Info as APFlowInfo;
             var colData = _col.Info as APColorInfo;
             _info = new APLayerInfo() {
                 map = this,
-                
+
                 f0 = flowData?.f0,
                 f1234 = flowData?.f1234,
                 f5678 = flowData?.f5678,
                 fTemp = flowData?.fTemp,
-                
+
                 color = colData?.adv,
                 cTemp = colData?.cTemp,
             };
@@ -87,11 +79,11 @@ namespace AP.Canvas
             {
                 throw new ApplicationException("APLayer.DoLoad: 错误！死去的Layer类开始攻击我！");
             }
-            
+
             base.DoLoad(info);
             var i = info as APLayerPersistentInfo;
             if (i == null) return;
-            
+
             _flow.DoLoad(i.flowInfo);
             _col.DoLoad(i.colorInfo);
         }
@@ -102,7 +94,7 @@ namespace AP.Canvas
             {
                 throw new ApplicationException("APLayer.DoSave: 错误！死去的Layer类开始攻击我！");
             }
-            
+
             var i = container as APLayerPersistentInfo;
             if (i == null) return container;
 
@@ -120,7 +112,7 @@ namespace AP.Canvas
             {
                 throw new ApplicationException("APLayer.NewEmptyInfp: 错误！死去的Layer类开始攻击我！");
             }
-            
+
             return new APLayerPersistentInfo()
             {
                 map = this,
@@ -132,7 +124,7 @@ namespace AP.Canvas
         public override void DoRelease()
         {
             if (Released) return;
-            
+
             base.DoRelease();
             _col.DoRelease();
             _flow.DoRelease();
@@ -143,5 +135,13 @@ namespace AP.Canvas
             _col.UpdateDefuse();
             _flow.UpdateDefuse();
         }
+
+        private APLayerInfo _info;
+        private int _id;
+        private string _name;
+        private LayerBlurType _blurType;
+        private APCanvasBlurMat _blurMat;
+        private APColor _col;
+        private APFlow _flow;
     }
 }

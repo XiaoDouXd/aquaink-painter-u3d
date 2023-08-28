@@ -4,8 +4,7 @@ public class APCanvasMgr : MonoBehaviour
 {
     #region 单例类
     public static APCanvasMgr I => _i;
-    private static APCanvasMgr _i;
-    
+
     private void Awake()
     {
         if (_i == null)
@@ -13,8 +12,10 @@ public class APCanvasMgr : MonoBehaviour
             _i = this;
             DontDestroyOnLoad(gameObject);
         }
-        else
-            Destroy(gameObject);
+        else Destroy(gameObject);
     }
+
+    private static APCanvasMgr _i;
+
     #endregion
 }

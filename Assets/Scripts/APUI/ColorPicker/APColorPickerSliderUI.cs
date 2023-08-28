@@ -12,11 +12,11 @@ namespace AP.UI
         B = 2,
         A = 3
     }
-    
+
     public class APColorPickerSliderUI : MonoBehaviour, IColorPickerComponent
     {
         public ColorChannel channel;
-        
+
         public Color _color;
 
         private APColorPickerUI _picker;
@@ -24,23 +24,23 @@ namespace AP.UI
         public InputField texInput;
         public RawImage bg;
         public Text tagTex;
-        
-        private static readonly int TargetColor = Shader.PropertyToID("_TargetColor");
 
         public void SetColor(Color color)
         {
             _color = color;
         }
+
         public void SliderValueChange()
         {
             texInput.text = $"{(int)slider.value}";
             SetVal((int)slider.value);
         }
+
         public void TexValueChange()
         {
             if (string.IsNullOrWhiteSpace(texInput.text))
                 slider.value = 0;
-            
+
             if (int.TryParse(texInput.text, out var c))
             {
                 slider.value = Mathf.Clamp(c, 0, 255);
@@ -72,7 +72,7 @@ namespace AP.UI
                     slider.value = _color.a * 255.0f;
                     break;
             }
-            
+
             bg.material.SetColor(TargetColor, _color);
         }
 
@@ -97,6 +97,7 @@ namespace AP.UI
             bg.material.SetColor(TargetColor, _color);
             _picker.UpdateAllBySlider(_color);
         }
+
         private void Awake()
         {
             // slider = transform.Find("/Slider").GetComponent<Slider>();
@@ -119,6 +120,8 @@ namespace AP.UI
                     break;
             }
         }
+
+        private static readonly int TargetColor = Shader.PropertyToID("_TargetColor");
     }
 }
 

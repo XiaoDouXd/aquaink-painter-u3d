@@ -8,15 +8,12 @@ namespace AP.UI
     {
         public int maxWidth;
         public int maxHeight;
-        
+
         public InputField widthInput;
         public InputField heightInput;
         public Button button;
 
         public GameObject mask;
-
-        private int _wid;
-        private int _hei;
 
         public void InputData()
         {
@@ -24,7 +21,7 @@ namespace AP.UI
                 widthInput.text = "1024";
             if (string.IsNullOrWhiteSpace(heightInput.text))
                 heightInput.text = "1024";
-            
+
             if (int.TryParse(widthInput.text, out var width))
             {
                 if (width > maxWidth)
@@ -56,7 +53,7 @@ namespace AP.UI
                 _hei = height;
             }
         }
-        
+
         public void NewCanvas()
         {
             if (_wid == 0)
@@ -69,7 +66,7 @@ namespace AP.UI
                 heightInput.text = "1024";
                 _hei = 1024;
             }
-            
+
             var canvas = APAssetObjMgr.CanvasObjs.Clone(
                 "SurfaceObj",
                 APInitMgr.I.surfaceRoot.gameObject);
@@ -82,9 +79,12 @@ namespace AP.UI
                 });
             canvas.SetActive(true);
             mask.SetActive(true);
-            
+
             MapRenderer.I.Refresh();
         }
+
+        private int _wid;
+        private int _hei;
     }
 }
 

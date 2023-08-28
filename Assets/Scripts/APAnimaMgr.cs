@@ -19,18 +19,17 @@ namespace AP
             var anim = new APAnima()
             {
                 enable = true,
-                
+
                 launcher = launcher,
                 curve = curve,
                 setter = setter,
-                t = curve == null ? launcher.Factor : curve.Invoke(launcher.Factor),
+                t = curve?.Invoke(launcher.Factor) ?? launcher.Factor,
                 lastFactor = launcher.Factor,
             };
 
             if (_animaLauncher.TryGetValue(launcher, out var an))
             {
-                if (an == null)
-                    an = new LinkedList<APAnima>();
+                an ??= new LinkedList<APAnima>();
                 an.AddLast(anim);
             }
             else
@@ -39,6 +38,7 @@ namespace AP
                 _animaLauncher[launcher].AddLast(anim);
             }
         }
+
         public void Unregister(IAnimaLauncher launcher)
         {
             if (_animaLauncher.TryGetValue(launcher, out var an))
@@ -61,64 +61,39 @@ namespace AP
             public float lastFactor;
         }
 
-        private Dictionary<IAnimaLauncher, LinkedList<APAnima>> _animaLauncher =
-            new Dictionary<IAnimaLauncher, LinkedList<APAnima>>();
-        private LinkedList<IAnimaLauncher> _clearLauncherTemp = new LinkedList<IAnimaLauncher>();
-
         private void UpdateAnima(APAnima an)
         {
             if (Mathf.Approximately(an.launcher.Factor, an.lastFactor))
             {
-                if ((an.launcher.Factor < 0 || an.launcher.Factor > 1) &&
-                    (an.t > 0 && an.t < 1))
-                {
-                    an.t = Mathf.Clamp01(an.launcher.Factor);
-                    if (an.curve != null)
-                    {
-                        an.setter.Invoke(an.curve.Invoke(an.t));
-                    }
-                    else
-                    {
-                        an.setter.Invoke(an.t);
-                    }
-                }
+                if ((!(an.launcher.Factor < 0) && !(an.launcher.Factor > 1)) ||
+                    !(an.t > 0) || !(an.t < 1)) return;
+                an.t = Mathf.Clamp01(an.launcher.Factor);
+                an.setter.Invoke(an.curve?.Invoke(an.t) ?? an.t);
                 return;
             }
 
             an.lastFactor = an.launcher.Factor;
 
-            if (an.lastFactor > 0 && an.lastFactor < 1)
+            if (an.lastFactor is > 0 and < 1)
             {
                 an.t = an.lastFactor;
-                if (an.curve != null)
-                {
-                    an.setter.Invoke(an.curve.Invoke(an.t));
-                }
-                else
-                {
-                    an.setter.Invoke(an.t);
-                }
+                an.setter.Invoke(an.curve?.Invoke(an.t) ?? an.t);
             }
-            else if (an.t > 0 && an.t < 1)
+            else if (an.t is > 0 and < 1)
             {
                 an.t = Mathf.Clamp01(an.launcher.Factor);
-                if (an.curve != null)
-                {
-                    an.setter.Invoke(an.curve.Invoke(an.t));
-                }
-                else
-                {
-                    an.setter.Invoke(an.t);
-                }
-
+                an.setter.Invoke(an.curve?.Invoke(an.t) ?? an.t);
                 an.t = -1;
             }
         }
 
-        #region 单例类
+        private readonly LinkedList<IAnimaLauncher> _clearLauncherTemp = new ();
+        private readonly Dictionary<IAnimaLauncher, LinkedList<APAnima>> _animaLauncher = new();
+
+        #region Inst
+
         public static APAnimaMgr I => _i;
-        private static APAnimaMgr _i;
-    
+
         private void Awake()
         {
             if (_i == null)
@@ -127,9 +102,9 @@ namespace AP
                 LeanTween.init();
                 DontDestroyOnLoad(gameObject);
             }
-            else
-                Destroy(gameObject);
+            else Destroy(gameObject);
         }
+
         private void Update()
         {
             foreach (var ans in _animaLauncher)
@@ -145,7 +120,7 @@ namespace AP
                     {
                         ans.Value.Remove(an);
                     }
-                    
+
                     an = an.Next;
                 }
 
@@ -156,15 +131,16 @@ namespace AP
             }
 
             // 清垃圾
-            if (_clearLauncherTemp.Count != 0)
+            if (_clearLauncherTemp.Count == 0) return;
+            foreach (var launcher in _clearLauncherTemp)
             {
-                foreach (var launcher in _clearLauncherTemp)
-                {
-                    _animaLauncher.Remove(launcher);
-                }
-                _clearLauncherTemp.Clear();
+                _animaLauncher.Remove(launcher);
             }
+            _clearLauncherTemp.Clear();
         }
+
+        private static APAnimaMgr _i;
+
         #endregion
     }
 }

@@ -19,14 +19,6 @@ namespace AP.UI
             }
         }
 
-
-        private APColorPickerUI _picker;
-        private float _h;
-        private RectTransform _rt;
-        private RawImage _ring;
-
-        private static readonly int Hue = Shader.PropertyToID("_Hue");
-
         private void UpdateRing()
         {
             _ring.material.SetFloat(Hue, _h);
@@ -71,5 +63,12 @@ namespace AP.UI
             _h = _picker.HSV.x;
             _ring.material.SetFloat(Hue, _h);
         }
+
+        private APColorPickerUI _picker;
+        private float _h;
+        private RectTransform _rt;
+        private RawImage _ring;
+
+        private static readonly int Hue = Shader.PropertyToID("_Hue");
     }
 }

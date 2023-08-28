@@ -10,7 +10,7 @@ namespace AP.Canvas
     public class MapRenderer
     {
         private const float MaxRenderTimeSlice = 1.0f / 60.0f;
-        
+
         public static MapRenderer I
         {
             get
@@ -20,28 +20,21 @@ namespace AP.Canvas
                 return _i;
             }
         }
-        private static MapRenderer _i;
-        
-        private float _timeCount;
-        private bool _refresh;
-        private bool _refreshCanvas;
-        private bool _pause;
-        private bool _canvasWaitSomeframe;
 
         public IEnumerator RenderCoroutine()
         {
             _refresh = false;
-            var flowMaps = new MapEnumerable(MapRankTypes.WATER_FLOW);
-            var colMap = new MapEnumerable(MapRankTypes.COLOR_FIX);
-            var layerMaps = new MapEnumerable(MapRankTypes.LAYER);
+            var flowMaps = new MapEnumerable(MapRankTypes.WaterFlow);
+            var colMap = new MapEnumerable(MapRankTypes.ColorFix);
+            var layerMaps = new MapEnumerable(MapRankTypes.Layer);
 
             while (Application.isPlaying)
             {
                 if (_refresh)
                 {
-                    flowMaps = new MapEnumerable(MapRankTypes.WATER_FLOW);
-                    colMap = new MapEnumerable(MapRankTypes.COLOR_FIX);
-                    layerMaps = new MapEnumerable(MapRankTypes.LAYER);
+                    flowMaps = new MapEnumerable(MapRankTypes.WaterFlow);
+                    colMap = new MapEnumerable(MapRankTypes.ColorFix);
+                    layerMaps = new MapEnumerable(MapRankTypes.Layer);
                     _refresh = false;
                 }
 
@@ -56,28 +49,29 @@ namespace AP.Canvas
                 {
                     col.DoUpdate();
                 }
-                
+
                 if (TimeOut()) yield return null;
 
                 foreach (var layer in layerMaps)
                 {
                     layer.DoUpdate();
                 }
-                
+
                 if (TimeOut()) yield return null;
 
                 while (_pause)
                 {
                     yield return null;
                 }
-                
+
                 yield return null;
             }
         }
+
         public IEnumerator RenderCanvasCoroutine()
         {
             _refreshCanvas = false;
-            var canvasMaps = new MapEnumerable(MapRankTypes.CANVAS);
+            var canvasMaps = new MapEnumerable(MapRankTypes.Canvas);
             while (Application.isPlaying)
             {
                 if (_canvasWaitSomeframe)
@@ -85,10 +79,10 @@ namespace AP.Canvas
                     yield return null;
                     _canvasWaitSomeframe = false;
                 }
-                
+
                 if (_refreshCanvas)
                 {
-                    canvasMaps = new MapEnumerable(MapRankTypes.CANVAS);
+                    canvasMaps = new MapEnumerable(MapRankTypes.Canvas);
                     _refreshCanvas = false;
                 }
 
@@ -106,6 +100,7 @@ namespace AP.Canvas
             _refresh = true;
             _refreshCanvas = true;
         }
+
         public void SetPause(bool p = true)
         {
             _pause = p;
@@ -115,6 +110,7 @@ namespace AP.Canvas
         {
             _canvasWaitSomeframe = true;
         }
+
         private bool TimeOut()
         {
             if (_timeCount >= MaxRenderTimeSlice)
@@ -126,6 +122,14 @@ namespace AP.Canvas
             _timeCount += Time.deltaTime;
             return false;
         }
+
+        private static MapRenderer _i;
+
+        private float _timeCount;
+        private bool _refresh;
+        private bool _refreshCanvas;
+        private bool _pause;
+        private bool _canvasWaitSomeframe;
     }
 }
 

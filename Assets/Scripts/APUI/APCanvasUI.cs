@@ -17,7 +17,7 @@ namespace AP.UI
     public class APCanvasUI : MonoBehaviour, IDragHandler, IPointerDownHandler, IPointerUpHandler, IScrollHandler
     {
         public bool Inited => _inited;
-        
+
         private APCanvas _canvas;
         private APBrushRound _brush;
         private RectTransform _background;
@@ -34,7 +34,7 @@ namespace AP.UI
 
             _canvas = new APCanvas(data.width, data.height, _surface, data.paper);
             _brush = new APBrushRound(_canvas);
-            
+
             // 根据窗口大小设置初始大小
             _proportion = (double)_canvas.Width / _canvas.Height;
             var windowProp = (double)APInitMgr.I.WindowSize.x / APInitMgr.I.WindowSize.y;
@@ -54,7 +54,7 @@ namespace AP.UI
                 var w = APInitMgr.I.WindowSize.x * 0.8f;
                 _background.sizeDelta = new Vector2(w , (float)(w / _proportion));
             }
-            
+
             _inited = true;
 
             _clearSave = _canvas[_canvas.FirstLayer].NewEmptyInfo() as APLayerPersistentInfo;
@@ -62,18 +62,20 @@ namespace AP.UI
             {
                 canvas = _canvas,
                 layer = _canvas[_canvas.FirstLayer],
-                op = APPersistentOp.DRAW
+                op = APPersistentOp.Draw
             });
-            
+
             _brush?.SetTex(APInitMgr.I.brushTex1);
             _brush?.SetRadius(APSamplerMgr.I.PenSizeMin);
         }
+
         //--------------------------------------------------------- UI刷新
+
         private void LerpResetSize()
         {
             if (!_inited) return;
             if (_moving) return;
-            
+
             _moving = true;
             LeanTween.scale(_background, Vector3.one, 0.1f).setEase(LeanTweenType.easeInOutSine);
             var desc = LeanTween.move(_background, Vector3.zero, 0.1f);
@@ -82,7 +84,7 @@ namespace AP.UI
             {
                 _moving = false;
             });
-            
+
             var windowProp = (double)APInitMgr.I.WindowSize.x / APInitMgr.I.WindowSize.y;
             if (windowProp >= _proportion)
             {
@@ -99,21 +101,25 @@ namespace AP.UI
                     .setEase(LeanTweenType.easeInOutSine);
             }
         }
+
         private void Update()
         {
             if (!_inited) return;
-            
+
             _brush?.SetColor(APSamplerMgr.I.CurColor);
             _brush?.SetBrushInterval(APSamplerMgr.I.BrushInterval);
 
-            if (Pen.current.press.wasPressedThisFrame || Mouse.current.press.wasPressedThisFrame)
+            var isPen = false;
+            if (Pen.current != null)
             {
-                _brush?.SetRotation(Time.time);
-            }
-            
-            if (Pen.current.pressure.IsActuated())
-            {
-                _brush?.SetRadius(Mathf.Lerp(
+                if (Pen.current.press.wasPressedThisFrame || Mouse.current.press.wasPressedThisFrame)
+                {
+                    _brush?.SetRotation(Time.time);
+                }
+
+                if (Pen.current.pressure.IsActuated())
+                {
+                    _brush?.SetRadius(Mathf.Lerp(
                         APSamplerMgr.I.PenSizeMin,
                         APSamplerMgr.I.PenSizeMax,
                         Pen.current.pressure.ReadValue()));
@@ -122,23 +128,29 @@ namespace AP.UI
                         APSamplerMgr.I.WetMax,
                         Pen.current.pressure.ReadValue()
                     ));
-                _brush?.SetSoftAndAlphaAdd(APSamplerMgr.I.Soft, 
-                    Mathf.Lerp(
-                        APSamplerMgr.I.AlphaAddMin,
-                        APSamplerMgr.I.AlphaAdd,
-                        Pen.current.pressure.ReadValue()));
-                _brush?.SetShapeFactor(
-                    Mathf.Clamp01(Pen.current.pressure.ReadValue() - 0.1f)
+                    _brush?.SetSoftAndAlphaAdd(APSamplerMgr.I.Soft,
+                        Mathf.Lerp(
+                            APSamplerMgr.I.AlphaAddMin,
+                            APSamplerMgr.I.AlphaAdd,
+                            Pen.current.pressure.ReadValue()));
+                    _brush?.SetShapeFactor(
+                        Mathf.Clamp01(Pen.current.pressure.ReadValue() - 0.1f)
                     );
-                _brush?.SetPressure(Pen.current.pressure.ReadValue());
+                    _brush?.SetPressure(Pen.current.pressure.ReadValue());
+                    isPen = true;
+                }
             }
-            else if (Mouse.current.leftButton.wasPressedThisFrame)
+
+            if (Mouse.current != null)
             {
-                _brush?.SetRadius(APSamplerMgr.I.PenSizeMax);
-                _brush?.SetWet(APSamplerMgr.I.WetMax);
-                _brush?.SetSoftAndAlphaAdd(APSamplerMgr.I.Soft, APSamplerMgr.I.AlphaAddMin);
-                _brush?.SetShapeFactor(0);
-                _brush?.SetPressure(1);
+                if (!isPen && Mouse.current.leftButton.wasPressedThisFrame)
+                {
+                    _brush?.SetRadius(APSamplerMgr.I.PenSizeMax);
+                    _brush?.SetWet(APSamplerMgr.I.WetMax);
+                    _brush?.SetSoftAndAlphaAdd(APSamplerMgr.I.Soft, APSamplerMgr.I.AlphaAddMin);
+                    _brush?.SetShapeFactor(0);
+                    _brush?.SetPressure(1);
+                }
             }
 
             if (Keyboard.current.spaceKey.wasPressedThisFrame)
@@ -156,6 +168,7 @@ namespace AP.UI
             {
                 APPersistentMgr.I.GoBack(_canvas);
             }
+
 #if !UNITY_EDITOR
             if (Keyboard.current.ctrlKey.isPressed &&
                 Keyboard.current.zKey.wasPressedThisFrame &&
@@ -168,7 +181,7 @@ namespace AP.UI
             {
                 APPersistentMgr.I.GoForward(_canvas);
             }
-            
+
             if (Keyboard.current.ctrlKey.isPressed &&
                 Keyboard.current.spaceKey.wasPressedThisFrame
                 && Keyboard.current.shiftKey.isPressed)
@@ -176,39 +189,40 @@ namespace AP.UI
                 _canvas[_canvas.FirstLayer].DoLoad(_clearSave);
             }
         }
+
         private void FixedUpdate()
         {
             _canvas.UpdateRenderData();
         }
 
         //--------------------------------------------------------- 画布交互
+
         public void OnDrag(PointerEventData eventData)
         {
             if (!_inited) return;
             if (_moving) return;
-            
-            if (eventData.button == PointerEventData.InputButton.Middle)
+
+            // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
+            switch (eventData.button)
             {
-                _background.anchoredPosition += eventData.delta;
-                return;
+                case PointerEventData.InputButton.Middle:
+                    _background.anchoredPosition += eventData.delta;
+                    return;
+                case PointerEventData.InputButton.Left:
+                    Draw(eventData.position);
+                    break;
             }
-            
-            if (
-                eventData.button == PointerEventData.InputButton.Left 
-            )
-                Draw(eventData.position);
         }
+
         public void OnPointerDown(PointerEventData eventData)
         {
             if (!_inited) return;
             if (_moving) return;
 
             if (eventData.button == PointerEventData.InputButton.Left)
-            {
                 Draw(eventData.position);
-            }
-                
         }
+
         private void Draw(Vector2 pos, bool up = false)
         {
             if (!_inited) return;
@@ -230,12 +244,14 @@ namespace AP.UI
                 _brush.DoWriteUp(posC.pos);
             }
         }
+
         public void OnScroll(PointerEventData eventData)
         {
             if (!_inited) return;
             if (_moving) return;
             _background.localScale += new Vector3(0.01f * eventData.scrollDelta.y, 0.01f * eventData.scrollDelta.y, 0);
         }
+
         public void OnPointerUp(PointerEventData eventData)
         {
             _brush?.SetRadius(APSamplerMgr.I.PenSizeMin);
@@ -244,7 +260,7 @@ namespace AP.UI
             {
                 canvas = _canvas,
                 layer = _canvas[_canvas.FirstLayer],
-                op = APPersistentOp.DRAW
+                op = APPersistentOp.Draw
             });
         }
     }

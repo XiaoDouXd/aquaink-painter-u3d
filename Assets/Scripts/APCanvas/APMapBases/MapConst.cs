@@ -5,11 +5,11 @@
     /// </summary>
     public enum MapRankTypes : uint
     {
-        NONE = 0,
-        WATER_FLOW = 100,
-        COLOR_FIX = 200,
-        LAYER = 300,
-        CANVAS = 400,
+        None = 0,
+        WaterFlow = 100,
+        ColorFix = 200,
+        Layer = 300,
+        Canvas = 400,
     }
 
     /// <summary>
@@ -17,11 +17,11 @@
     /// </summary>
     public enum LayerBlurType : uint
     {
-        NORMAL = 0,
-        REALITY = 1,
-        MULTIPLY = 2,
-        DARKEN = 3,
-        ADD = 4,
-        OVERLAY = 5,
+        Normal = 0,
+        Reality = 1,
+        Multiply = 2,
+        Darken = 3,
+        Add = 4,
+        Overlay = 5,
     }
 }
